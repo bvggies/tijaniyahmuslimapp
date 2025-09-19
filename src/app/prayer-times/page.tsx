@@ -93,7 +93,7 @@ export default function PrayerTimesPage() {
 
   useEffect(() => {
     if (prayerTimes) {
-      const next = getNextPrayerTime(prayerTimes)
+      const next = getNextPrayerTime(prayerTimes as unknown as Record<string, string>)
       setNextPrayer(next)
     }
   }, [prayerTimes])

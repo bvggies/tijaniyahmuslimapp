@@ -18,6 +18,7 @@ import {
   DownloadIcon,
   UploadIcon,
   CheckCircleIcon,
+  XCircleIcon,
   AlertTriangleIcon
 } from 'lucide-react'
 
@@ -328,7 +329,7 @@ export default function AdminPrayersPage() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
                   <p className="text-sm font-bold text-primary">
-                    {formatDate(Math.max(...prayerTimes.map(p => p.lastUpdated.getTime()))}
+                    {formatDate(new Date(Math.max(...prayerTimes.map(p => p.lastUpdated.getTime()))))}
                   </p>
                 </div>
                 <ClockIcon className="h-8 w-8 text-purple-500/20" />

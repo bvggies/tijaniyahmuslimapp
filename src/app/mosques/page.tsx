@@ -14,12 +14,12 @@ import {
   StarIcon,
   HeartIcon,
   ShareIcon,
-  DirectionsIcon,
+  ArrowRightIcon,
   UsersIcon,
   CalendarIcon,
   WifiIcon,
   CarIcon,
-  WheelchairIcon
+  AccessibilityIcon
 } from 'lucide-react'
 
 interface Mosque {
@@ -452,7 +452,7 @@ export default function MosquesPage() {
                         size="sm"
                         onClick={() => getDirections(mosque)}
                       >
-                        <DirectionsIcon className="h-4 w-4 mr-2" />
+                        <ArrowRightIcon className="h-4 w-4 mr-2" />
                         Directions
                       </Button>
                     </div>

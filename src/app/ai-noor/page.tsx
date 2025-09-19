@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -57,7 +57,7 @@ const mockAIResponses: Record<string, AIResponse> = {
   }
 }
 
-export default function AINoorPage() {
+function AINoorContent() {
   const searchParams = useSearchParams()
   const [query, setQuery] = useState('')
   const [response, setResponse] = useState<AIResponse | null>(null)
@@ -303,5 +303,20 @@ export default function AINoorPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AINoorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center">
+        <div className="text-center">
+          <LoaderIcon className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading AI Noor...</p>
+        </div>
+      </div>
+    }>
+      <AINoorContent />
+    </Suspense>
   )
 }

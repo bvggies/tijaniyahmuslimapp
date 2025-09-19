@@ -138,13 +138,20 @@ export default function LazimPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingLazim, setEditingLazim] = useState<Lazim | null>(null)
-  const [newLazim, setNewLazim] = useState({
+  const [newLazim, setNewLazim] = useState<{
+    name: string
+    description: string
+    frequency: 'daily' | 'weekly' | 'monthly'
+    target: number
+    category: string
+    priority: 'high' | 'medium' | 'low'
+  }>({
     name: '',
     description: '',
-    frequency: 'daily' as const,
+    frequency: 'daily',
     target: 1,
     category: 'Prayer',
-    priority: 'medium' as const
+    priority: 'medium'
   })
 
   // Load data from localStorage

@@ -187,7 +187,7 @@ export default function Home() {
     }, 1000)
 
     // Calculate next prayer time
-    const next = getNextPrayerTime(mockPrayerTimes)
+    const next = getNextPrayerTime(mockPrayerTimes as unknown as Record<string, string>)
     setNextPrayer(next)
 
     // Check user authentication

@@ -65,7 +65,7 @@ export function setupBackgroundSync() {
     navigator.serviceWorker.ready.then((registration) => {
       // Register for background sync only if supported
       if ('sync' in registration) {
-        return registration.sync.register('prayer-times-sync')
+        return (registration as any).sync.register('prayer-times-sync')
       }
     }).catch((error) => {
       console.warn('Background sync not supported or failed:', error)

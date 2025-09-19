@@ -71,13 +71,20 @@ export default function JournalPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedMood, setSelectedMood] = useState('All')
   const [showPrivate, setShowPrivate] = useState(true)
-  const [newEntry, setNewEntry] = useState({
+  const [newEntry, setNewEntry] = useState<{
+    title: string
+    content: string
+    mood: 'grateful' | 'reflective' | 'struggling' | 'peaceful' | 'inspired'
+    category: 'prayer' | 'quran' | 'dhikr' | 'charity' | 'learning' | 'reflection' | 'gratitude'
+    isPrivate: boolean
+    tags: string[]
+  }>({
     title: '',
     content: '',
-    mood: 'grateful' as const,
-    category: 'reflection' as const,
+    mood: 'grateful',
+    category: 'reflection',
     isPrivate: false,
-    tags: [] as string[]
+    tags: []
   })
 
   // Load data from localStorage
