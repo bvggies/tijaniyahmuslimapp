@@ -63,14 +63,21 @@ function AINoorContent() {
   const [response, setResponse] = useState<AIResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const searchQuery = searchParams.get('query')
-    if (searchQuery) {
-      setQuery(searchQuery)
-      handleSearch(searchQuery)
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      const searchQuery = searchParams.get('query')
+      if (searchQuery) {
+        setQuery(searchQuery)
+        handleSearch(searchQuery)
+      }
     }
-  }, [searchParams])
+  }, [searchParams, mounted])
 
   const handleSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) return
@@ -89,17 +96,23 @@ function AINoorContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to get AI response')
+        const errorText = await response.text()
+        throw new Error(`API Error: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
       
+      // Validate response data
+      if (!data || typeof data.answer !== 'string') {
+        throw new Error('Invalid response format from API')
+      }
+      
       // Simulate typing effect
       setTimeout(() => {
         setResponse({
-          answer: data.answer,
-          sources: data.sources,
-          suggestions: data.suggestions
+          answer: data.answer || 'I apologize, but I could not generate a proper response.',
+          sources: data.sources || ['AI Noor'],
+          suggestions: data.suggestions || ['Try asking about prayer times', 'Ask about the Quran']
         })
         setIsLoading(false)
         setIsTyping(false)
@@ -129,6 +142,17 @@ function AINoorContent() {
   const handleSuggestionClick = (suggestion: string) => {
     setQuery(suggestion)
     handleSearch(suggestion)
+  }
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center">
+        <div className="text-center">
+          <LoaderIcon className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading AI Noor...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -331,7 +355,55 @@ export default function AINoorPage() {
         </div>
       </div>
     }>
-      <AINoorContent />
+      <ErrorBoundary>
+        <AINoorContent />
+      </ErrorBoundary>
     </Suspense>
   )
+}
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('AI Noor Error Boundary caught an error:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-6">
+            <div className="w-16 h-16 muslim-gradient rounded-full flex items-center justify-center mx-auto mb-4">
+              <BotIcon className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Oops! Something went wrong</h2>
+            <p className="text-muted-foreground mb-4">
+              AI Noor encountered an error. Please refresh the page and try again.
+            </p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="muslim-gradient text-white hover:opacity-90"
+            >
+              <RefreshCwIcon className="h-4 w-4 mr-2" />
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
 }
