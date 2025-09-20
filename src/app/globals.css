@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  /* Dark Mode (Default) */
   --background: #075c45;
   --foreground: #ffffff;
   --primary: #ffffff;
@@ -30,6 +31,240 @@
   --islamic-border: #0f6b52;
   
   /* Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, #075c45 0%, #0a8b6b 100%);
+  --gradient-gold: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+  --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  --gradient-deep-green: linear-gradient(135deg, #075c45 0%, #0d4a3a 50%, #0a8b6b 100%);
+  --gradient-sky: linear-gradient(135deg, #87ceeb 0%, #b0e0e6 100%);
+}
+
+/* Light Mode - System Preference */
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #f8fafc;
+    --foreground: #1e293b;
+    --primary: #075c45;
+    --primary-foreground: #ffffff;
+    --secondary: #f1f5f9;
+    --secondary-foreground: #0f172a;
+    --muted: #e2e8f0;
+    --muted-foreground: #64748b;
+    --accent: #0a8b6b;
+    --accent-foreground: #ffffff;
+    --border: #e2e8f0;
+    --input: #ffffff;
+    --ring: #075c45;
+    
+    /* Islamic Theme Colors - Light Mode */
+    --islamic-green: #075c45;
+    --islamic-gold: #d4af37;
+    --islamic-cream: #f8fafc;
+    --islamic-sage: #e2e8f0;
+    --islamic-earth: #d4af37;
+    --islamic-sky: #0ea5e9;
+    --islamic-sunset: #f97316;
+    --islamic-moon: #f1f5f9;
+    --islamic-deep: #075c45;
+    --islamic-card: #ffffff;
+    --islamic-border: #e2e8f0;
+    
+    /* Gradient Colors - Light Mode */
+    --gradient-primary: linear-gradient(135deg, #075c45 0%, #0a8b6b 100%);
+    --gradient-gold: linear-gradient(135deg, #d4af37 0%, #fbbf24 100%);
+    --gradient-sunset: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+    --gradient-deep-green: linear-gradient(135deg, #075c45 0%, #0a8b6b 100%);
+    --gradient-sky: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+  }
+  
+  /* Light Mode Specific Styles */
+  .muslim-card {
+    background: var(--islamic-card) !important;
+    border: 1px solid var(--islamic-border) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  }
+  
+  .muslim-text-gradient {
+    background: var(--gradient-primary) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+  
+  .islamic-gradient {
+    background: var(--gradient-primary) !important;
+  }
+  
+  /* Fix text colors in light mode */
+  .text-primary {
+    color: var(--islamic-green) !important;
+  }
+  
+  .text-muted-foreground {
+    color: var(--muted-foreground) !important;
+  }
+  
+  .text-foreground {
+    color: var(--foreground) !important;
+  }
+  
+  /* Fix button colors in light mode */
+  .bg-primary {
+    background-color: var(--primary) !important;
+  }
+  
+  .text-primary-foreground {
+    color: var(--primary-foreground) !important;
+  }
+  
+  /* Fix border colors in light mode */
+  .border-border {
+    border-color: var(--border) !important;
+  }
+  
+  /* Fix input colors in light mode */
+  .bg-input {
+    background-color: var(--input) !important;
+  }
+  
+  /* Fix muted background in light mode */
+  .bg-muted {
+    background-color: var(--muted) !important;
+  }
+  
+  /* Fix secondary colors in light mode */
+  .bg-secondary {
+    background-color: var(--secondary) !important;
+  }
+  
+  .text-secondary-foreground {
+    color: var(--secondary-foreground) !important;
+  }
+}
+
+/* Manual Light Mode */
+[data-theme="light"] {
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --primary: #075c45;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --accent: #0a8b6b;
+  --accent-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #075c45;
+  
+  /* Islamic Theme Colors - Light Mode */
+  --islamic-green: #075c45;
+  --islamic-gold: #d4af37;
+  --islamic-cream: #f8fafc;
+  --islamic-sage: #e2e8f0;
+  --islamic-earth: #d4af37;
+  --islamic-sky: #0ea5e9;
+  --islamic-sunset: #f97316;
+  --islamic-moon: #f1f5f9;
+  --islamic-deep: #075c45;
+  --islamic-card: #ffffff;
+  --islamic-border: #e2e8f0;
+  
+  /* Gradient Colors - Light Mode */
+  --gradient-primary: linear-gradient(135deg, #075c45 0%, #0a8b6b 100%);
+  --gradient-gold: linear-gradient(135deg, #d4af37 0%, #fbbf24 100%);
+  --gradient-sunset: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  --gradient-deep-green: linear-gradient(135deg, #075c45 0%, #0a8b6b 100%);
+  --gradient-sky: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+}
+
+[data-theme="light"] .muslim-card {
+  background: var(--islamic-card) !important;
+  border: 1px solid var(--islamic-border) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .muslim-text-gradient {
+  background: var(--gradient-primary) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+[data-theme="light"] .islamic-gradient {
+  background: var(--gradient-primary) !important;
+}
+
+[data-theme="light"] .text-primary {
+  color: var(--islamic-green) !important;
+}
+
+[data-theme="light"] .text-muted-foreground {
+  color: var(--muted-foreground) !important;
+}
+
+[data-theme="light"] .text-foreground {
+  color: var(--foreground) !important;
+}
+
+[data-theme="light"] .bg-primary {
+  background-color: var(--primary) !important;
+}
+
+[data-theme="light"] .text-primary-foreground {
+  color: var(--primary-foreground) !important;
+}
+
+[data-theme="light"] .border-border {
+  border-color: var(--border) !important;
+}
+
+[data-theme="light"] .bg-input {
+  background-color: var(--input) !important;
+}
+
+[data-theme="light"] .bg-muted {
+  background-color: var(--muted) !important;
+}
+
+[data-theme="light"] .bg-secondary {
+  background-color: var(--secondary) !important;
+}
+
+[data-theme="light"] .text-secondary-foreground {
+  color: var(--secondary-foreground) !important;
+}
+
+/* Manual Dark Mode */
+[data-theme="dark"] {
+  --background: #075c45;
+  --foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #075c45;
+  --secondary: #ffd700;
+  --secondary-foreground: #075c45;
+  --muted: #0d4a3a;
+  --muted-foreground: #ffffff;
+  --accent: #b8860b;
+  --accent-foreground: #ffffff;
+  --border: #0f6b52;
+  --input: #0d4a3a;
+  --ring: #0a8b6b;
+  
+  /* Islamic Theme Colors - Dark Mode */
+  --islamic-green: #ffffff;
+  --islamic-gold: #ffd700;
+  --islamic-cream: #ffffff;
+  --islamic-sage: #ffffff;
+  --islamic-earth: #ffd700;
+  --islamic-sky: #87ceeb;
+  --islamic-sunset: #ff6b35;
+  --islamic-moon: #ffffff;
+  --islamic-deep: #075c45;
+  --islamic-card: #0d4a3a;
+  --islamic-border: #0f6b52;
+  
+  /* Gradient Colors - Dark Mode */
   --gradient-primary: linear-gradient(135deg, #075c45 0%, #0a8b6b 100%);
   --gradient-gold: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
   --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);

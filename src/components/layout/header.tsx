@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils'
 import { SearchBar } from '@/components/ui/search-bar'
 import { Logo } from '@/components/ui/logo'
 import { BackToHome } from '@/components/ui/back-to-home'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 const navigation = [
   { name: 'Prayer Times', href: '/prayer-times', icon: ClockIcon },
@@ -59,6 +60,9 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+          
           {/* Back to Home Button - Only show when not on homepage */}
           {pathname !== '/' && (
             <BackToHome variant="minimal" className="mr-2" />
@@ -108,6 +112,11 @@ export function Header() {
             {/* Mobile Search */}
             <div className="mb-4">
               <SearchBar placeholder="Search anything..." />
+            </div>
+            
+            {/* Mobile Theme Toggle */}
+            <div className="mb-4">
+              <ThemeToggle />
             </div>
             
             {/* Mobile Back to Home Button - Only show when not on homepage */}
