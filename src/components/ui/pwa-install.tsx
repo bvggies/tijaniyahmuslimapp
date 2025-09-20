@@ -85,7 +85,7 @@ export function PWAInstall() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50">
-      <div className="bg-white/95 backdrop-blur-md border border-border rounded-lg shadow-xl p-4 islamic-glow">
+      <div className="bg-background/95 backdrop-blur-md border border-border rounded-lg shadow-xl p-4 islamic-glow">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 islamic-gradient rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-white text-lg">🕌</span>
@@ -110,7 +110,7 @@ export function PWAInstall() {
                 size="sm"
                 variant="outline"
                 onClick={handleDismiss}
-                className="text-xs px-3 py-1"
+                className="text-xs px-3 py-1 border-border text-foreground hover:bg-muted"
               >
                 <XIcon className="h-3 w-3" />
               </Button>

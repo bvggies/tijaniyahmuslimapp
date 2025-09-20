@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Logo } from '@/components/ui/logo'
 
 export default function UserRegisterPage() {
   const [formData, setFormData] = useState({
@@ -123,8 +124,8 @@ export default function UserRegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-background via-primary-50/30 to-secondary-50/30 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserPlusIcon className="h-8 w-8 text-primary" />
+          <div className="flex justify-center mb-6">
+            <Logo size="lg" animated={true} showText={true} />
           </div>
           <CardTitle className="text-2xl">Create Account</CardTitle>
           <CardDescription>

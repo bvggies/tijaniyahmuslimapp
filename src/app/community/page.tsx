@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { AccessControl } from '@/components/admin/access-control'
 import { 
   MessageCircleIcon, 
   UsersIcon,
@@ -148,6 +149,14 @@ const samplePosts: Post[] = [
 ]
 
 export default function CommunityPage() {
+  return (
+    <AccessControl requiredRole={['user', 'admin', 'super-admin']} feature="community">
+      <CommunityContent />
+    </AccessControl>
+  )
+}
+
+function CommunityContent() {
   const [posts, setPosts] = useState<Post[]>(samplePosts)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')

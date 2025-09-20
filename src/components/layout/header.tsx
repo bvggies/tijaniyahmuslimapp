@@ -74,7 +74,7 @@ export function Header() {
                   className={cn(
                     "flex items-center space-x-1 px-2",
                     isActive && "text-primary-foreground",
-                    item.special && "muslim-gradient text-white hover:opacity-90"
+                    item.special && "bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90 shadow-lg"
                   )}
                   title={item.name}
                 >
@@ -129,7 +129,7 @@ export function Header() {
                       className={cn(
                         "flex items-center space-x-1 px-3 py-2 text-xs",
                         isActive && "text-primary-foreground",
-                        item.special && "muslim-gradient text-white hover:opacity-90"
+                        item.special && "bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90 shadow-lg"
                       )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >

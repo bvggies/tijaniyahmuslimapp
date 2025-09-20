@@ -18,7 +18,22 @@ import {
   SettingsIcon,
   LogOutIcon,
   ChevronRightIcon,
-  ShieldIcon
+  ShieldIcon,
+  StarIcon,
+  ClockIcon,
+  BellIcon,
+  SearchIcon,
+  FilterIcon,
+  PlusIcon,
+  TrendingUpIcon,
+  ActivityIcon,
+  EyeIcon,
+  DownloadIcon,
+  RefreshCwIcon,
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  MoreVerticalIcon
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -33,6 +48,10 @@ interface MenuItem {
   href: string
   description?: string
   badge?: string
+  requiredRole?: string[]
+  category?: string
+  isNew?: boolean
+  isPro?: boolean
 }
 
 const menuItems: MenuItem[] = [
@@ -41,7 +60,8 @@ const menuItems: MenuItem[] = [
     title: 'Dashboard',
     icon: HomeIcon,
     href: '/admin/dashboard',
-    description: 'Overview and analytics'
+    description: 'Overview and analytics',
+    category: 'main'
   },
   {
     id: 'users',
@@ -49,14 +69,18 @@ const menuItems: MenuItem[] = [
     icon: UsersIcon,
     href: '/admin/users',
     description: 'Manage user accounts',
-    badge: '12'
+    badge: '12',
+    category: 'management',
+    requiredRole: ['admin', 'super-admin']
   },
   {
     id: 'content',
     title: 'Content',
     icon: BookOpenIcon,
     href: '/admin/content',
-    description: 'Manage app content'
+    description: 'Manage app content',
+    category: 'management',
+    requiredRole: ['admin', 'super-admin', 'content-manager']
   },
   {
     id: 'community',
@@ -64,21 +88,46 @@ const menuItems: MenuItem[] = [
     icon: MessageCircleIcon,
     href: '/admin/community',
     description: 'Moderate discussions',
-    badge: '3'
+    badge: '3',
+    category: 'moderation',
+    requiredRole: ['admin', 'super-admin', 'moderator']
+  },
+  {
+    id: 'reviews',
+    title: 'Reviews',
+    icon: StarIcon,
+    href: '/admin/reviews',
+    description: 'Manage user reviews',
+    badge: '8',
+    category: 'moderation',
+    requiredRole: ['admin', 'super-admin', 'moderator']
   },
   {
     id: 'mosques',
     title: 'Mosques',
     icon: MapPinIcon,
     href: '/admin/mosques',
-    description: 'Mosque management'
+    description: 'Mosque management',
+    category: 'management',
+    requiredRole: ['admin', 'super-admin']
+  },
+  {
+    id: 'prayers',
+    title: 'Prayer Times',
+    icon: ClockIcon,
+    href: '/admin/prayers',
+    description: 'Manage prayer schedules',
+    category: 'management',
+    requiredRole: ['admin', 'super-admin']
   },
   {
     id: 'live-streams',
     title: 'Live Streams',
     icon: VideoIcon,
     href: '/admin/live-streams',
-    description: 'Manage live broadcasts'
+    description: 'Manage live broadcasts',
+    category: 'media',
+    requiredRole: ['admin', 'super-admin', 'content-manager']
   },
   {
     id: 'donations',
@@ -86,21 +135,27 @@ const menuItems: MenuItem[] = [
     icon: HeartHandshakeIcon,
     href: '/admin/donations',
     description: 'Track donations',
-    badge: '5'
+    badge: '5',
+    category: 'financial',
+    requiredRole: ['admin', 'super-admin']
   },
   {
     id: 'analytics',
     title: 'Analytics',
     icon: BarChart3Icon,
     href: '/admin/analytics',
-    description: 'View detailed reports'
+    description: 'View detailed reports',
+    category: 'reports',
+    requiredRole: ['admin', 'super-admin']
   },
   {
     id: 'settings',
     title: 'Settings',
     icon: SettingsIcon,
     href: '/admin/settings',
-    description: 'System configuration'
+    description: 'System configuration',
+    category: 'system',
+    requiredRole: ['admin', 'super-admin']
   }
 ]
 
@@ -109,6 +164,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [activeItem, setActiveItem] = useState<string>('')
   const [adminUser, setAdminUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const router = useRouter()
   const pathname = usePathname()
 
@@ -130,6 +187,51 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       setActiveItem(currentItem.id)
     }
   }, [pathname, router])
+
+  // Filter menu items based on user role and search
+  const filteredMenuItems = menuItems.filter(item => {
+    // Check role-based access
+    if (item.requiredRole && adminUser) {
+      if (!item.requiredRole.includes(adminUser.role)) {
+        return false
+      }
+    }
+    
+    // Filter by category
+    if (selectedCategory !== 'all' && item.category !== selectedCategory) {
+      return false
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      return item.title.toLowerCase().includes(query) || 
+             item.description?.toLowerCase().includes(query)
+    }
+    
+    return true
+  })
+
+  // Group menu items by category
+  const groupedMenuItems = filteredMenuItems.reduce((acc, item) => {
+    const category = item.category || 'other'
+    if (!acc[category]) {
+      acc[category] = []
+    }
+    acc[category].push(item)
+    return acc
+  }, {} as Record<string, MenuItem[]>)
+
+  const categoryLabels = {
+    main: 'Main',
+    management: 'Management',
+    moderation: 'Moderation',
+    media: 'Media',
+    financial: 'Financial',
+    reports: 'Reports',
+    system: 'System',
+    other: 'Other'
+  }
 
   const handleMenuClick = (item: MenuItem) => {
     setActiveItem(item.id)
@@ -205,42 +307,103 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </div>
           </div>
 
-          {/* Navigation Menu */}
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {menuItems.map((item) => {
-              const Icon = item.icon
-              const isActive = activeItem === item.id
-              
-              return (
+          {/* Search and Filter */}
+          <div className="p-4 border-b border-border">
+            <div className="relative mb-3">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search menu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 text-sm bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <div className="flex gap-1">
+              <Button
+                variant={selectedCategory === 'all' ? 'islamic' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory('all')}
+                className="text-xs"
+              >
+                All
+              </Button>
+              {Object.keys(categoryLabels).map(category => (
                 <Button
-                  key={item.id}
-                  variant={isActive ? "islamic" : "ghost"}
-                  className={cn(
-                    "w-full justify-start h-auto p-4 text-left",
-                    isActive && "text-primary-foreground shadow-lg"
-                  )}
-                  onClick={() => handleMenuClick(item)}
+                  key={category}
+                  variant={selectedCategory === category ? 'islamic' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(category)}
+                  className="text-xs"
                 >
-                  <div className="flex items-center gap-3 w-full">
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium truncate">{item.title}</span>
-                        {item.badge && (
-                          <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full ml-2">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {item.description}
-                      </p>
-                    </div>
-                    <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
-                  </div>
+                  {categoryLabels[category as keyof typeof categoryLabels]}
                 </Button>
-              )
-            })}
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation Menu */}
+          <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
+            {Object.entries(groupedMenuItems).map(([category, items]) => (
+              <div key={category} className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                  {categoryLabels[category as keyof typeof categoryLabels]}
+                </h3>
+                <div className="space-y-1">
+                  {items.map((item) => {
+                    const Icon = item.icon
+                    const isActive = activeItem === item.id
+                    
+                    return (
+                      <Button
+                        key={item.id}
+                        variant={isActive ? "islamic" : "ghost"}
+                        className={cn(
+                          "w-full justify-start h-auto p-3 text-left group hover:bg-muted/50 transition-all duration-200",
+                          isActive && "text-primary-foreground shadow-lg bg-primary"
+                        )}
+                        onClick={() => handleMenuClick(item)}
+                      >
+                        <div className="flex items-center gap-3 w-full">
+                          <div className={cn(
+                            "p-2 rounded-lg transition-colors",
+                            isActive ? "bg-primary-foreground/20" : "bg-muted/50 group-hover:bg-muted"
+                          )}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium truncate text-sm">{item.title}</span>
+                              <div className="flex items-center gap-2">
+                                {item.isNew && (
+                                  <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                    New
+                                  </span>
+                                )}
+                                {item.isPro && (
+                                  <span className="bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                    Pro
+                                  </span>
+                                )}
+                                {item.badge && (
+                                  <span className="bg-secondary text-secondary-foreground text-xs px-2 py-0.5 rounded-full">
+                                    {item.badge}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 truncate">
+                              {item.description}
+                            </p>
+                          </div>
+                          <ChevronRightIcon className="h-4 w-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           {/* Footer */}
