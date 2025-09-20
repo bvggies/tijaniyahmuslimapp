@@ -31,6 +31,14 @@ export const metadata: Metadata = {
   authors: [{ name: "Tijaniyah Muslim App Team" }],
   robots: "index, follow",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/images/islamic-scholar.png", type: "image/png" }
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/images/islamic-scholar.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
