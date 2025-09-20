@@ -78,32 +78,47 @@ function AINoorContent() {
     setIsLoading(true)
     setIsTyping(true)
 
-    // Simulate AI processing time
-    setTimeout(() => {
-      const lowerQuery = searchQuery.toLowerCase()
-      let aiResponse: AIResponse | null = null
+    try {
+      // Call the AI Noor API
+      const response = await fetch('/api/ai-noor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question: searchQuery }),
+      })
 
-      // Find matching response
-      for (const [key, value] of Object.entries(mockAIResponses)) {
-        if (lowerQuery.includes(key)) {
-          aiResponse = value
-          break
-        }
+      if (!response.ok) {
+        throw new Error('Failed to get AI response')
       }
 
-      // If no specific match, provide a general response
-      if (!aiResponse) {
-        aiResponse = {
-          answer: `I understand you're asking about "${searchQuery}". While I don't have specific information about this topic in my current knowledge base, I can help you with Islamic topics like prayer times, Quran, duas, tasbih, Qibla direction, and more. Please try searching for these topics or ask me about Islamic practices and beliefs.`,
-          sources: ['AI Noor Knowledge Base'],
-          suggestions: ['Prayer times', 'Quran', 'Duas', 'Qibla direction', 'Tasbih']
-        }
-      }
-
-      setResponse(aiResponse)
-      setIsLoading(false)
-      setIsTyping(false)
-    }, 2000)
+      const data = await response.json()
+      
+      // Simulate typing effect
+      setTimeout(() => {
+        setResponse({
+          answer: data.answer,
+          sources: data.sources,
+          suggestions: data.suggestions
+        })
+        setIsLoading(false)
+        setIsTyping(false)
+      }, 1000)
+      
+    } catch (error) {
+      console.error('Error getting AI response:', error)
+      
+      // Fallback response
+      setTimeout(() => {
+        setResponse({
+          answer: `I apologize, but I'm having trouble connecting right now. Please try again in a moment. In the meantime, I can help you with Islamic topics like prayer times, Quran, duas, tasbih, Qibla direction, and more.`,
+          sources: ['AI Noor'],
+          suggestions: ['Try asking about prayer times', 'Ask about the Quran', 'Learn about Islamic practices']
+        })
+        setIsLoading(false)
+        setIsTyping(false)
+      }, 1000)
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
