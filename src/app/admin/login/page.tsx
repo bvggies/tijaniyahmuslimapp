@@ -12,7 +12,7 @@ import {
   UserIcon
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Logo } from '@/components/ui/logo'
+import { SimpleLogo } from '@/components/ui/simple-logo'
 
 export default function AdminLoginPage() {
   const [credentials, setCredentials] = useState({
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-6">
-            <Logo size="lg" animated={true} showText={true} />
+            <SimpleLogo size="lg" animated={true} showText={true} />
           </div>
           <CardTitle className="text-2xl">Admin Login</CardTitle>
           <CardDescription>
