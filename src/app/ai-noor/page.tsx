@@ -190,7 +190,7 @@ function AINoorContent() {
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="Ask AI Noor anything about Islam..."
-                      className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary search-shine"
+                      className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary search-shine text-foreground placeholder:text-muted-foreground"
                       disabled={isLoading}
                     />
                     {isLoading && (

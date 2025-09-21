@@ -47,45 +47,28 @@ export function ForceUpdate() {
   }, [])
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-lg">
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleCheckUpdates}
-            variant="outline"
-            size="sm"
-            disabled={isChecking}
-            className="flex items-center gap-1"
-          >
-            <RefreshCwIcon className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
-            Check
-          </Button>
-          
-          <Button
-            onClick={handleForceUpdate}
-            variant="default"
-            size="sm"
-            disabled={isChecking}
-            className="muslim-gradient text-white hover:opacity-90 flex items-center gap-1"
-          >
-            <DownloadIcon className="h-3 w-3" />
-            Update
-          </Button>
-        </div>
-        
-        {lastChecked && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Last checked: {lastChecked.toLocaleTimeString()}
-          </p>
-        )}
-        
-        <div className="mt-2 p-2 bg-muted/50 rounded text-xs">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <AlertCircleIcon className="h-3 w-3" />
-            <span>Updates are checked automatically</span>
-          </div>
-        </div>
-      </div>
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <Button
+        onClick={handleCheckUpdates}
+        variant="outline"
+        size="sm"
+        disabled={isChecking}
+        className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center"
+        title="Check for Updates"
+      >
+        <RefreshCwIcon className={`h-4 w-4 ${isChecking ? 'animate-spin' : ''}`} />
+      </Button>
+      
+      <Button
+        onClick={handleForceUpdate}
+        variant="default"
+        size="sm"
+        disabled={isChecking}
+        className="w-12 h-12 rounded-full muslim-gradient text-white hover:opacity-90 shadow-lg flex items-center justify-center"
+        title="Force Update"
+      >
+        <DownloadIcon className="h-4 w-4" />
+      </Button>
     </div>
   )
 }

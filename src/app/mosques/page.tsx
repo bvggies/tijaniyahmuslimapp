@@ -535,8 +535,17 @@ export default function MosquesPage() {
       script.async = true
       script.defer = true
       script.onload = () => {
-        console.log('Google Maps loaded successfully')
-        setMapLoaded(true)
+        console.log('Google Maps script loaded, waiting for API to be ready...')
+        // Wait a bit more for the API to be fully ready
+        setTimeout(() => {
+          if ((window as any).google && (window as any).google.maps && (window as any).google.maps.places) {
+            console.log('Google Maps API fully loaded and ready')
+            setMapLoaded(true)
+          } else {
+            console.log('Google Maps script loaded but API not ready yet')
+            setMapLoaded(true) // Still set as loaded, the search function will handle the waiting
+          }
+        }, 1000)
       }
       script.onerror = (error) => {
         console.error('Google Maps failed to load:', error)
@@ -648,11 +657,30 @@ export default function MosquesPage() {
   const searchNearbyMosques = async (lat: number, lng: number, radiusKm: number) => {
     console.log('Starting mosque search...', { lat, lng, radiusKm })
     
-    if (!(window as any).google || !(window as any).google.maps) {
-      console.log('Google Maps not loaded yet')
-      setIsLoading(false)
-      setError('Google Maps is not loaded. Please refresh the page and try again.')
-      return
+    // Wait for Google Maps to be fully loaded
+    if (!(window as any).google || !(window as any).google.maps || !(window as any).google.maps.places) {
+      console.log('Google Maps not fully loaded yet, waiting...')
+      
+      // Wait up to 5 seconds for Google Maps to load
+      let attempts = 0
+      const maxAttempts = 10
+      
+      while (attempts < maxAttempts) {
+        if ((window as any).google && (window as any).google.maps && (window as any).google.maps.places) {
+          console.log('Google Maps loaded after waiting')
+          break
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 500))
+        attempts++
+      }
+      
+      if (!(window as any).google || !(window as any).google.maps || !(window as any).google.maps.places) {
+        console.log('Google Maps still not loaded after waiting')
+        setIsLoading(false)
+        setError('Google Maps is not loaded. Please refresh the page and try again.')
+        return
+      }
     }
 
     setIsLoading(true)
