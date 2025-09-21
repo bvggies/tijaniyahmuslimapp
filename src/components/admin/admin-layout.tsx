@@ -266,20 +266,20 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-80 bg-background/95 backdrop-blur-md border-r border-border transform transition-transform duration-300 ease-in-out",
+        "fixed inset-y-0 left-0 z-50 w-80 bg-gradient-to-b from-background via-background/98 to-muted/30 backdrop-blur-xl border-r border-border/50 transform transition-transform duration-300 ease-in-out shadow-2xl",
         sidebarOpen ? "translate-x-0" : "-translate-x-full",
         "md:translate-x-0 md:static md:inset-0"
       )}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border">
+          <div className="flex items-center justify-between p-6 border-b border-border/50 bg-gradient-to-r from-primary/5 to-secondary/5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <ShieldIcon className="h-6 w-6 text-primary-foreground" />
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                <ShieldIcon className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-primary">Admin Panel</h1>
-                <p className="text-xs text-muted-foreground">Tijaniyah Muslim App</p>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Admin Panel</h1>
+                <p className="text-sm text-muted-foreground font-medium">Tijaniyah Muslim App</p>
               </div>
             </div>
             <Button
@@ -293,38 +293,42 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
 
           {/* User Info */}
-          <div className="p-6 border-b border-border">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">
+          <div className="p-6 border-b border-border/50 bg-gradient-to-r from-muted/30 to-transparent">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-primary via-secondary to-accent rounded-2xl flex items-center justify-center shadow-lg ring-2 ring-primary/20">
+                <span className="text-white font-bold text-xl">
                   {adminUser.name?.charAt(0) || 'A'}
                 </span>
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-primary">{adminUser.name}</h3>
-                <p className="text-sm text-muted-foreground">{adminUser.role}</p>
+                <h3 className="font-bold text-lg text-foreground">{adminUser.name}</h3>
+                <p className="text-sm text-muted-foreground font-medium capitalize">{adminUser.role}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-xs text-muted-foreground">Online</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Search and Filter */}
-          <div className="p-4 border-b border-border">
-            <div className="relative mb-3">
+          <div className="p-4 border-b border-border/50 bg-gradient-to-r from-muted/20 to-transparent">
+            <div className="relative mb-4">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search menu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full pl-10 pr-4 py-3 text-sm bg-background/80 border border-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 backdrop-blur-sm transition-all duration-200"
               />
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-2 flex-wrap">
               <Button
                 variant={selectedCategory === 'all' ? 'islamic' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedCategory('all')}
-                className="text-xs"
+                className="text-xs font-medium px-3 py-1.5 rounded-lg"
               >
                 All
               </Button>
@@ -334,7 +338,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   variant={selectedCategory === category ? 'islamic' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
-                  className="text-xs"
+                  className="text-xs font-medium px-3 py-1.5 rounded-lg"
                 >
                   {categoryLabels[category as keyof typeof categoryLabels]}
                 </Button>
@@ -343,13 +347,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </div>
 
           {/* Navigation Menu */}
-          <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
             {Object.entries(groupedMenuItems).map(([category, items]) => (
-              <div key={category} className="space-y-2">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+              <div key={category} className="space-y-3">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-3 py-1 bg-muted/30 rounded-lg">
                   {categoryLabels[category as keyof typeof categoryLabels]}
                 </h3>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {items.map((item) => {
                     const Icon = item.icon
                     const isActive = activeItem === item.id
@@ -359,40 +363,40 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                         key={item.id}
                         variant={isActive ? "islamic" : "ghost"}
                         className={cn(
-                          "w-full justify-start h-auto p-3 text-left group hover:bg-muted/50 transition-all duration-200",
-                          isActive && "text-primary-foreground shadow-lg bg-primary"
+                          "w-full justify-start h-auto p-4 text-left group hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 rounded-xl",
+                          isActive && "text-primary-foreground shadow-xl bg-gradient-to-r from-primary to-secondary"
                         )}
                         onClick={() => handleMenuClick(item)}
                       >
-                        <div className="flex items-center gap-3 w-full">
+                        <div className="flex items-center gap-4 w-full">
                           <div className={cn(
-                            "p-2 rounded-lg transition-colors",
-                            isActive ? "bg-primary-foreground/20" : "bg-muted/50 group-hover:bg-muted"
+                            "p-3 rounded-xl transition-all duration-300",
+                            isActive ? "bg-primary-foreground/20 shadow-lg" : "bg-muted/50 group-hover:bg-muted group-hover:shadow-md"
                           )}>
-                            <Icon className="h-4 w-4" />
+                            <Icon className="h-5 w-5" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
-                              <span className="font-medium truncate text-sm">{item.title}</span>
+                              <span className="font-semibold truncate text-sm">{item.title}</span>
                               <div className="flex items-center gap-2">
                                 {item.isNew && (
-                                  <span className="bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                  <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
                                     New
                                   </span>
                                 )}
                                 {item.isPro && (
-                                  <span className="bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                  <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
                                     Pro
                                   </span>
                                 )}
                                 {item.badge && (
-                                  <span className="bg-secondary text-secondary-foreground text-xs px-2 py-0.5 rounded-full">
+                                  <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full font-medium">
                                     {item.badge}
                                   </span>
                                 )}
                               </div>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1 truncate">
+                            <p className="text-xs text-muted-foreground mt-1 truncate font-medium">
                               {item.description}
                             </p>
                           </div>
@@ -407,10 +411,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-border">
+          <div className="p-4 border-t border-border/50 bg-gradient-to-r from-muted/20 to-transparent">
             <Button
               variant="ghost"
-              className="w-full justify-start text-red-500 hover:text-red-700 hover:bg-red-50"
+              className="w-full justify-start text-red-500 hover:text-red-700 hover:bg-red-50/50 p-4 rounded-xl transition-all duration-200 font-medium"
               onClick={handleLogout}
             >
               <LogOutIcon className="h-5 w-5 mr-3" />
@@ -423,38 +427,47 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Main Content */}
       <div className="md:ml-80">
         {/* Top Bar */}
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
-          <div className="flex items-center justify-between p-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <MenuIcon className="h-6 w-6" />
-            </Button>
-            
+        <div className="sticky top-0 z-30 bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg">
+          <div className="flex items-center justify-between p-6">
             <div className="flex items-center gap-4">
-              <h2 className="text-xl font-semibold text-primary">
-                {menuItems.find(item => item.id === activeItem)?.title || 'Dashboard'}
-              </h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden hover:bg-primary/10"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <MenuIcon className="h-6 w-6" />
+              </Button>
+              
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {menuItems.find(item => item.id === activeItem)?.title || 'Dashboard'}
+                </h2>
+                <p className="text-sm text-muted-foreground font-medium">
+                  {menuItems.find(item => item.id === activeItem)?.description || 'Welcome to your admin dashboard'}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               {isLoading && (
-                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center gap-2 text-primary">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm font-medium">Loading...</span>
+                </div>
               )}
             </div>
           </div>
         </div>
 
         {/* Page Content */}
-        <div className="p-6">
+        <div className="p-8 bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
           {isLoading ? (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center min-h-[500px]">
               <div className="text-center">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-muted-foreground">Loading...</p>
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">Loading...</h3>
+                <p className="text-muted-foreground">Please wait while we prepare your content</p>
               </div>
             </div>
           ) : (

@@ -504,11 +504,22 @@ export default function MosquesPage() {
         return
       }
 
+      // Check if API key is available
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+      if (!apiKey) {
+        console.warn('Google Maps API key not found. Map functionality will be limited.')
+        setError('Google Maps API key not configured. Please contact administrator.')
+        return
+      }
+
       const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
       script.async = true
       script.defer = true
       script.onload = () => setMapLoaded(true)
+      script.onerror = () => {
+        setError('Failed to load Google Maps. Please check your internet connection.')
+      }
       document.head.appendChild(script)
     }
 
@@ -518,69 +529,85 @@ export default function MosquesPage() {
   // Initialize map when component mounts and map is loaded
   useEffect(() => {
     if (mapLoaded && mapRef.current && !mapInstanceRef.current && userLocation) {
-      const google = (window as any).google
-      const map = new google.maps.Map(mapRef.current, {
-        center: { lat: userLocation.latitude, lng: userLocation.longitude },
-        zoom: 12,
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-          }
-        ]
-      })
-      mapInstanceRef.current = map
-
-      // Add user location marker
-      new google.maps.Marker({
-        position: { lat: userLocation.latitude, lng: userLocation.longitude },
-        map: map,
-        title: 'Your Location',
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="8" fill="#3B82F6" stroke="white" stroke-width="2"/>
-              <circle cx="12" cy="12" r="3" fill="white"/>
-            </svg>
-          `),
-          scaledSize: new google.maps.Size(24, 24)
+      try {
+        const google = (window as any).google
+        if (!google || !google.maps) {
+          setError('Google Maps is not available')
+          return
         }
-      })
+
+        const map = new google.maps.Map(mapRef.current, {
+          center: { lat: userLocation.latitude, lng: userLocation.longitude },
+          zoom: 12,
+          styles: [
+            {
+              featureType: 'poi',
+              elementType: 'labels',
+              stylers: [{ visibility: 'off' }]
+            }
+          ]
+        })
+        mapInstanceRef.current = map
+
+        // Add user location marker
+        new google.maps.Marker({
+          position: { lat: userLocation.latitude, lng: userLocation.longitude },
+          map: map,
+          title: 'Your Location',
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="8" fill="#3B82F6" stroke="white" stroke-width="2"/>
+                <circle cx="12" cy="12" r="3" fill="white"/>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(24, 24)
+          }
+        })
+      } catch (err) {
+        console.error('Error initializing map:', err)
+        setError('Failed to initialize map')
+      }
     }
   }, [mapLoaded, userLocation])
 
   // Update map markers when mosques change
   useEffect(() => {
     if (mapInstanceRef.current && mosques.length > 0) {
-      const google = (window as any).google
-      // Clear existing markers
-      markersRef.current.forEach(marker => marker.setMap(null))
-      markersRef.current = []
+      try {
+        const google = (window as any).google
+        if (!google || !google.maps) return
 
-      // Add mosque markers
-      mosques.forEach(mosque => {
-        const marker = new google.maps.Marker({
-          position: { lat: mosque.latitude, lng: mosque.longitude },
-          map: mapInstanceRef.current,
-          title: mosque.name,
-          icon: {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="14" fill="#10B981" stroke="white" stroke-width="2"/>
-                <path d="M16 8L20 12H18V20H14V12H12L16 8Z" fill="white"/>
-              </svg>
-            `),
-            scaledSize: new google.maps.Size(32, 32)
-          }
+        // Clear existing markers
+        markersRef.current.forEach(marker => marker.setMap(null))
+        markersRef.current = []
+
+        // Add mosque markers
+        mosques.forEach(mosque => {
+          const marker = new google.maps.Marker({
+            position: { lat: mosque.latitude, lng: mosque.longitude },
+            map: mapInstanceRef.current,
+            title: mosque.name,
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="14" fill="#10B981" stroke="white" stroke-width="2"/>
+                  <path d="M16 8L20 12H18V20H14V12H12L16 8Z" fill="white"/>
+                </svg>
+              `),
+              scaledSize: new google.maps.Size(32, 32)
+            }
+          })
+
+          marker.addListener('click', () => {
+            setSelectedMosque(mosque)
+          })
+
+          markersRef.current.push(marker)
         })
-
-        marker.addListener('click', () => {
-          setSelectedMosque(mosque)
-        })
-
-        markersRef.current.push(marker)
-      })
+      } catch (err) {
+        console.error('Error updating map markers:', err)
+      }
     }
   }, [mosques])
 
@@ -850,6 +877,29 @@ export default function MosquesPage() {
           </Card>
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="mb-8">
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-red-700">
+                  <SettingsIcon className="h-5 w-5" />
+                  <p className="font-medium">Map Error</p>
+                </div>
+                <p className="text-red-600 text-sm mt-1">{error}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setError(null)}
+                  className="mt-2"
+                >
+                  Dismiss
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Map View */}
         {showMap && (
           <div className="mb-8">
@@ -858,21 +908,51 @@ export default function MosquesPage() {
                 <CardTitle className="flex items-center gap-2">
                   <MapIcon className="h-6 w-6" />
                   Interactive Map
+                  {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                      Demo Mode
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div 
-                  ref={mapRef} 
-                  className="w-full h-96 rounded-lg border"
-                  style={{ minHeight: '400px' }}
-                />
-                {!mapLoaded && (
+                {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
                   <div className="flex items-center justify-center h-96 bg-muted/50 rounded-lg">
                     <div className="text-center">
-                      <LoaderIcon className="h-8 w-8 animate-spin mx-auto mb-2" />
-                      <p className="text-muted-foreground">Loading map...</p>
+                      <MapIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                        Map Not Available
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        Google Maps API key is not configured. The map will show mock data only.
+                      </p>
+                      <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+                        {mosques.slice(0, 4).map((mosque) => (
+                          <div key={mosque.id} className="p-3 bg-white rounded border">
+                            <h4 className="font-medium text-sm">{mosque.name}</h4>
+                            <p className="text-xs text-muted-foreground">{mosque.address}</p>
+                            <p className="text-xs text-primary">{formatDistance(mosque.distance)}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
+                ) : (
+                  <>
+                    <div 
+                      ref={mapRef} 
+                      className="w-full h-96 rounded-lg border"
+                      style={{ minHeight: '400px' }}
+                    />
+                    {!mapLoaded && (
+                      <div className="flex items-center justify-center h-96 bg-muted/50 rounded-lg">
+                        <div className="text-center">
+                          <LoaderIcon className="h-8 w-8 animate-spin mx-auto mb-2" />
+                          <p className="text-muted-foreground">Loading map...</p>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>

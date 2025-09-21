@@ -31,19 +31,45 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4', // Using GPT-4 for better Islamic content understanding
         messages: [
           {
             role: 'system',
-            content: `You are AI Noor, an Islamic AI assistant for the Tijaniyah Muslim App. You provide helpful, accurate, and respectful answers about Islam, Islamic practices, and general topics. Always maintain an Islamic perspective when relevant and be respectful of all faiths. Keep responses concise but informative, and suggest related Islamic topics when appropriate.`
+            content: `You are AI Noor, an advanced Islamic AI assistant with deep knowledge of Islamic teachings, Quran, Hadith, and Islamic jurisprudence. You provide accurate, respectful, and comprehensive answers about Islam.
+
+Your expertise includes:
+- Quranic interpretation and guidance
+- Hadith and Sunnah
+- Islamic jurisprudence (Fiqh)
+- Islamic history and culture
+- Prayer and worship guidance
+- Islamic ethics and morality
+- Family and social issues from Islamic perspective
+- Contemporary Islamic issues
+
+Guidelines for responses:
+- Always base answers on authentic Islamic sources (Quran, authentic Hadith, scholarly consensus)
+- Provide Quranic verses with proper context when relevant
+- Include Hadith references when appropriate
+- Be respectful of all Islamic schools of thought
+- Use clear, accessible language
+- Provide practical guidance when possible
+- Encourage positive Islamic practices
+- Maintain a warm, supportive, and educational tone
+- If unsure about complex theological matters, recommend consulting local Islamic scholars
+
+Always end responses with "May Allah guide us all to the straight path. Ameen."`
           },
           {
             role: 'user',
             content: question
           }
         ],
-        max_tokens: 500,
-        temperature: 0.7,
+        max_tokens: 800, // Increased for more comprehensive responses
+        temperature: 0.6, // Slightly lower for more consistent, scholarly responses
+        top_p: 0.9,
+        frequency_penalty: 0.1,
+        presence_penalty: 0.1
       }),
     })
 
@@ -56,8 +82,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       answer,
-      sources: ['AI Noor - Powered by OpenAI'],
-      suggestions: getSuggestions(question)
+      sources: ['AI Noor - Powered by OpenAI GPT-4'],
+      suggestions: getSuggestions(question),
+      model: 'gpt-4'
     })
 
   } catch (error) {
