@@ -66,18 +66,82 @@ export default function DonatePage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitted(true)
+    try {
+      // Convert file to base64 for submission
+      let receiptUrl = '/receipts/default.pdf'
+      if (selectedFile) {
+        const reader = new FileReader()
+        reader.onload = async () => {
+          const base64 = reader.result as string
+          receiptUrl = base64
+          
+          // Submit donation
+          const response = await fetch('/api/donations', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              donorName,
+              donorEmail,
+              donorPhone,
+              amount: parseFloat(amount),
+              message,
+              receiptUrl
+            })
+          })
+
+          if (response.ok) {
+            setIsSubmitted(true)
+            setIsSubmitting(false)
+            // Reset form
+            setSelectedFile(null)
+            setDonorName('')
+            setDonorEmail('')
+            setDonorPhone('')
+            setAmount('')
+            setMessage('')
+          } else {
+            throw new Error('Failed to submit donation')
+          }
+        }
+        reader.readAsDataURL(selectedFile)
+      } else {
+        // Submit without file
+        const response = await fetch('/api/donations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            donorName,
+            donorEmail,
+            donorPhone,
+            amount: parseFloat(amount),
+            message,
+            receiptUrl
+          })
+        })
+
+        if (response.ok) {
+          setIsSubmitted(true)
+          setIsSubmitting(false)
+          // Reset form
+          setSelectedFile(null)
+          setDonorName('')
+          setDonorEmail('')
+          setDonorPhone('')
+          setAmount('')
+          setMessage('')
+        } else {
+          throw new Error('Failed to submit donation')
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting donation:', error)
       setIsSubmitting(false)
-      // Reset form
-      setSelectedFile(null)
-      setDonorName('')
-      setDonorEmail('')
-      setDonorPhone('')
-      setAmount('')
-      setMessage('')
-    }, 2000)
+      alert('Failed to submit donation. Please try again.')
+    }
   }
 
   if (isSubmitted) {

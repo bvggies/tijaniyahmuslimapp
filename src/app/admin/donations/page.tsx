@@ -74,10 +74,11 @@ const mockDonations: Donation[] = [
 ]
 
 export default function DonationsPage() {
-  const [donations, setDonations] = useState<Donation[]>(mockDonations)
+  const [donations, setDonations] = useState<Donation[]>([])
   const [filter, setFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [adminUser, setAdminUser] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // Check admin authentication
@@ -90,7 +91,30 @@ export default function DonationsPage() {
     }
     
     setAdminUser(JSON.parse(user))
+    fetchDonations()
   }, [])
+
+  const fetchDonations = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/donations')
+      const data = await response.json()
+      
+      if (data.success) {
+        setDonations(data.data)
+      } else {
+        console.error('Failed to fetch donations:', data.error)
+        // Fallback to mock data
+        setDonations(mockDonations)
+      }
+    } catch (error) {
+      console.error('Error fetching donations:', error)
+      // Fallback to mock data
+      setDonations(mockDonations)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredDonations = donations.filter(donation => {
     const matchesFilter = filter === 'all' || donation.status === filter
@@ -99,17 +123,43 @@ export default function DonationsPage() {
     return matchesFilter && matchesSearch
   })
 
-  const handleStatusChange = (id: string, status: 'verified' | 'rejected') => {
-    setDonations(prev => prev.map(donation => 
-      donation.id === id 
-        ? { 
-            ...donation, 
-            status, 
-            verifiedAt: new Date().toISOString(),
-            verifiedBy: adminUser?.username || 'admin'
-          }
-        : donation
-    ))
+  const handleStatusChange = async (id: string, status: 'verified' | 'rejected') => {
+    try {
+      const response = await fetch('/api/donations', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id,
+          status,
+          verifiedBy: adminUser?.username || 'admin'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          // Update local state
+          setDonations(prev => prev.map(donation => 
+            donation.id === id 
+              ? { 
+                  ...donation, 
+                  status, 
+                  verifiedAt: new Date().toISOString(),
+                  verifiedBy: adminUser?.username || 'admin'
+                }
+              : donation
+          ))
+        } else {
+          console.error('Failed to update donation status:', data.error)
+        }
+      } else {
+        console.error('Failed to update donation status')
+      }
+    } catch (error) {
+      console.error('Error updating donation status:', error)
+    }
   }
 
   const getStatusBadge = (status: string) => {
@@ -131,6 +181,18 @@ export default function DonationsPage() {
 
   if (!adminUser) {
     return <div>Loading...</div>
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">Loading Donations...</h3>
+          <p className="text-muted-foreground">Please wait while we fetch the latest donations</p>
+        </div>
+      </div>
+    )
   }
 
   return (
