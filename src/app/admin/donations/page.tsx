@@ -79,6 +79,7 @@ export default function DonationsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [adminUser, setAdminUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null)
 
   useEffect(() => {
     // Check admin authentication
@@ -159,6 +160,16 @@ export default function DonationsPage() {
       }
     } catch (error) {
       console.error('Error updating donation status:', error)
+    }
+  }
+
+  const handleViewReceipt = (receiptUrl: string) => {
+    if (receiptUrl.startsWith('data:')) {
+      // It's a base64 data URL, show in modal
+      setSelectedReceipt(receiptUrl)
+    } else {
+      // It's a regular URL, open in new tab
+      window.open(receiptUrl, '_blank')
     }
   }
 
@@ -325,7 +336,7 @@ export default function DonationsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(donation.receiptUrl, '_blank')}
+                    onClick={() => handleViewReceipt(donation.receiptUrl)}
                   >
                     <EyeIcon className="h-4 w-4 mr-1" />
                     View Receipt
@@ -370,6 +381,47 @@ export default function DonationsPage() {
             </p>
           </CardContent>
         </Card>
+      )}
+
+      {/* Receipt Viewer Modal */}
+      {selectedReceipt && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg max-w-4xl max-h-[90vh] w-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Payment Receipt</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedReceipt(null)}
+              >
+                <XIcon className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-4 overflow-auto max-h-[70vh]">
+              <img
+                src={selectedReceipt}
+                alt="Payment Receipt"
+                className="max-w-full h-auto rounded-lg border"
+                onError={(e) => {
+                  console.error('Error loading receipt image:', e)
+                  e.currentTarget.style.display = 'none'
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                }}
+              />
+              <div className="hidden text-center text-muted-foreground mt-4">
+                <p>Unable to load receipt image</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(selectedReceipt, '_blank')}
+                  className="mt-2"
+                >
+                  Open in New Tab
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
