@@ -506,6 +506,9 @@ export default function MosquesPage() {
 
       // Check if API key is available
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+      console.log('Google Maps API Key:', apiKey ? 'Present' : 'Missing')
+      console.log('API Key value:', apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined')
+      
       if (!apiKey) {
         console.warn('Google Maps API key not found. Map functionality will be limited.')
         setError('Google Maps API key not configured. Please contact administrator.')
