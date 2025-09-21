@@ -32,7 +32,7 @@ export default function UserLoginPage() {
     setIsLoading(true)
     setError('')
 
-    // Authenticate user via API
+    // Authenticate user via API with fallback to localStorage
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -45,12 +45,72 @@ export default function UserLoginPage() {
         })
       })
 
-      const data = await response.json()
+      if (response.ok) {
+        const data = await response.json()
 
-      if (data.success) {
+        if (data.success) {
+          localStorage.setItem('user-token', 'user-token-' + Date.now())
+          localStorage.setItem('user-data', JSON.stringify({
+            ...data.data,
+            lastLogin: new Date().toISOString(),
+            isVerified: true,
+            preferences: {
+              language: 'English',
+              timezone: 'UTC',
+              notifications: true
+            }
+          }))
+          router.push('/')
+        } else {
+          setError(data.error || 'Invalid email or password')
+        }
+        setIsLoading(false)
+      } else {
+        // API not available, fallback to localStorage
+        console.log('API not available, using localStorage fallback')
+        fallbackToLocalStorage()
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      // API not available, fallback to localStorage
+      console.log('API error, using localStorage fallback')
+      fallbackToLocalStorage()
+    }
+
+    function fallbackToLocalStorage() {
+      // Check hardcoded demo users first
+      const demoCredentials = {
+        'user@example.com': { password: 'user123', name: 'Ahmad Hassan', username: 'ahmad_hassan', role: 'user' },
+        'fatima@example.com': { password: 'fatima123', name: 'Fatima Al-Zahra', username: 'fatima_z', role: 'user' },
+        'omar@example.com': { password: 'omar123', name: 'Omar Abdullah', username: 'omar_a', role: 'user' },
+        'aisha@example.com': { password: 'aisha123', name: 'Aisha Rahman', username: 'aisha_r', role: 'user' },
+        'yusuf@example.com': { password: 'yusuf123', name: 'Yusuf Ibrahim', username: 'yusuf_i', role: 'user' }
+      }
+
+      let user = demoCredentials[credentials.email as keyof typeof demoCredentials]
+      
+      // If not found in demo users, check registered users
+      if (!user) {
+        const registeredUsers = JSON.parse(localStorage.getItem('registered-users') || '[]')
+        const registeredUser = registeredUsers.find((u: any) => u.email === credentials.email)
+        
+        if (registeredUser && registeredUser.password === credentials.password) {
+          user = {
+            password: registeredUser.password,
+            name: registeredUser.name,
+            username: registeredUser.username,
+            role: registeredUser.role || 'user'
+          }
+        }
+      }
+      
+      if (user && user.password === credentials.password) {
         localStorage.setItem('user-token', 'user-token-' + Date.now())
         localStorage.setItem('user-data', JSON.stringify({
-          ...data.data,
+          email: credentials.email,
+          name: user.name,
+          username: user.username,
+          role: user.role,
           lastLogin: new Date().toISOString(),
           isVerified: true,
           preferences: {
@@ -61,12 +121,8 @@ export default function UserLoginPage() {
         }))
         router.push('/')
       } else {
-        setError(data.error || 'Invalid email or password')
+        setError('Invalid email or password')
       }
-      setIsLoading(false)
-    } catch (error) {
-      console.error('Login error:', error)
-      setError('Login failed. Please try again.')
       setIsLoading(false)
     }
   }

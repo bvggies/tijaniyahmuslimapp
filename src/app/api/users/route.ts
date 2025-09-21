@@ -83,11 +83,14 @@ let users: any[] = [
 // GET - Fetch all users
 export async function GET() {
   try {
+    console.log('Users API called - GET request')
     return NextResponse.json({
       success: true,
-      data: users
+      data: users,
+      message: 'Users fetched successfully'
     })
   } catch (error) {
+    console.error('Error fetching users:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch users' },
       { status: 500 }
@@ -98,7 +101,9 @@ export async function GET() {
 // POST - Create new user
 export async function POST(request: NextRequest) {
   try {
+    console.log('Users API called - POST request')
     const body = await request.json()
+    console.log('Registration data:', body)
     
     // Check if user already exists
     const existingUser = users.find(user => 
@@ -106,6 +111,7 @@ export async function POST(request: NextRequest) {
     )
     
     if (existingUser) {
+      console.log('User already exists:', existingUser.email)
       return NextResponse.json(
         { success: false, error: 'User with this email or username already exists' },
         { status: 400 }
@@ -129,6 +135,7 @@ export async function POST(request: NextRequest) {
     }
     
     users.push(newUser)
+    console.log('New user created:', newUser)
     
     return NextResponse.json({
       success: true,
@@ -136,6 +143,7 @@ export async function POST(request: NextRequest) {
       message: 'User registered successfully'
     })
   } catch (error) {
+    console.error('Error creating user:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to register user' },
       { status: 500 }
