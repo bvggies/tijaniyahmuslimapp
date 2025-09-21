@@ -1,8 +1,16 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+
+// Google Maps type declarations
+declare global {
+  interface Window {
+    google: any
+  }
+}
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Slider } from '@/components/ui/slider'
 import { 
   MapPinIcon, 
   SearchIcon,
@@ -19,185 +27,416 @@ import {
   CalendarIcon,
   WifiIcon,
   CarIcon,
-  AccessibilityIcon
+  AccessibilityIcon,
+  MapIcon,
+  LocateIcon,
+  SettingsIcon,
+  RefreshCwIcon,
+  LoaderIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ExternalLinkIcon,
+  MessageCircleIcon,
+  BookOpenIcon,
+  GraduationCapIcon,
+  CoffeeIcon,
+  ShoppingBagIcon,
+  CameraIcon,
+  VideoIcon,
+  MicIcon,
+  HandIcon,
+  BabyIcon,
+  WifiOffIcon,
+  Clock3Icon,
+  Clock4Icon,
+  Clock5Icon,
+  Clock6Icon,
+  Clock7Icon,
+  Clock8Icon,
+  Clock9Icon,
+  Clock10Icon,
+  Clock11Icon,
+  Clock12Icon,
+  Clock1Icon,
+  Clock2Icon
 } from 'lucide-react'
+
+interface PrayerTime {
+  fajr: string
+  dhuhr: string
+  asr: string
+  maghrib: string
+  isha: string
+  nextPrayer?: string
+  nextPrayerTime?: string
+}
+
+interface Event {
+  id: string
+  title: string
+  date: string
+  time: string
+  description: string
+  type: 'lecture' | 'class' | 'event' | 'prayer' | 'community'
+  registrationRequired?: boolean
+  maxAttendees?: number
+  currentAttendees?: number
+}
+
+interface Review {
+  id: string
+  userId: string
+  userName: string
+  rating: number
+  comment: string
+  date: string
+  helpful: number
+}
 
 interface Mosque {
   id: string
+  place_id: string
   name: string
   address: string
   city: string
-  country: string
+  description: string
   latitude: number
   longitude: number
+  rating: number
+  user_ratings_total: number
+  distance?: number
+  isFavorite?: boolean
   phone?: string
   website?: string
   email?: string
-  description: string
-  facilities: string[]
-  prayerTimes: {
-    fajr: string
-    dhuhr: string
-    asr: string
-    maghrib: string
-    isha: string
-  }
-  jummahTimes: string[]
-  distance?: number
-  rating: number
-  isFavorite: boolean
-  image?: string
   capacity?: number
-  languages: string[]
+  facilities: string[]
   services: string[]
+  prayerTimes: PrayerTime
+  events: Event[]
+  reviews: Review[]
+  photos?: string[]
+  openingHours?: {
+    open_now: boolean
+    weekday_text: string[]
+  }
+  socialMedia?: {
+    facebook?: string
+    instagram?: string
+    twitter?: string
+    youtube?: string
+  }
+  imam?: {
+    name: string
+    bio: string
+    photo?: string
+  }
+  accessibility?: {
+    wheelchair_accessible: boolean
+    parking: boolean
+    wudu_facilities: boolean
+    women_prayer_area: boolean
+    children_facilities: boolean
+  }
 }
 
-const sampleMosques: Mosque[] = [
-  {
-    id: '1',
-    name: 'Islamic Center of New York',
-    address: '123 Main Street, New York, NY 10001',
-    city: 'New York',
-    country: 'United States',
-    latitude: 40.7128,
-    longitude: -74.0060,
-    phone: '+1 (555) 123-4567',
-    website: 'https://icny.org',
-    email: 'info@icny.org',
-    description: 'A vibrant Islamic center serving the Muslim community in New York with daily prayers, educational programs, and community services.',
-    facilities: ['Parking', 'Wheelchair Access', 'WiFi', 'Library', 'Cafeteria', 'Childcare'],
-    prayerTimes: {
-      fajr: '05:30',
-      dhuhr: '12:15',
-      asr: '15:45',
-      maghrib: '18:20',
-      isha: '19:45'
-    },
-    jummahTimes: ['12:30 PM', '1:30 PM'],
-    rating: 4.8,
-    isFavorite: false,
-    capacity: 500,
-    languages: ['English', 'Arabic', 'Urdu'],
-    services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Islamic Education', 'Marriage Services', 'Funeral Services']
-  },
-  {
-    id: '2',
-    name: 'Masjid Al-Noor',
-    address: '456 Oak Avenue, Los Angeles, CA 90210',
-    city: 'Los Angeles',
-    country: 'United States',
-    latitude: 34.0522,
-    longitude: -118.2437,
-    phone: '+1 (555) 987-6543',
-    website: 'https://masjidalnoor.org',
-    description: 'A beautiful mosque with modern facilities and a welcoming community. Offers various educational and social programs.',
-    facilities: ['Parking', 'Wheelchair Access', 'WiFi', 'Library', 'Gym'],
-    prayerTimes: {
-      fajr: '05:25',
-      dhuhr: '12:10',
-      asr: '15:40',
-      maghrib: '18:15',
-      isha: '19:40'
-    },
-    jummahTimes: ['12:15 PM', '1:15 PM'],
-    rating: 4.6,
-    isFavorite: false,
-    capacity: 300,
-    languages: ['English', 'Arabic', 'Spanish'],
-    services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Youth Programs', 'Community Events']
-  },
-  {
-    id: '3',
-    name: 'Islamic Society of Toronto',
-    address: '789 Maple Street, Toronto, ON M5V 3A8',
-    city: 'Toronto',
-    country: 'Canada',
-    latitude: 43.6532,
-    longitude: -79.3832,
-    phone: '+1 (416) 555-0123',
-    website: 'https://ist.ca',
-    description: 'One of the largest Islamic centers in Canada, providing comprehensive religious and community services.',
-    facilities: ['Parking', 'Wheelchair Access', 'WiFi', 'Library', 'Cafeteria', 'Childcare', 'Gym', 'Bookstore'],
-    prayerTimes: {
-      fajr: '05:35',
-      dhuhr: '12:20',
-      asr: '15:50',
-      maghrib: '18:25',
-      isha: '19:50'
-    },
-    jummahTimes: ['12:30 PM', '1:30 PM', '2:30 PM'],
-    rating: 4.9,
-    isFavorite: false,
-    capacity: 1000,
-    languages: ['English', 'Arabic', 'Urdu', 'French'],
-    services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Islamic Education', 'Marriage Services', 'Funeral Services', 'Youth Programs', 'Community Events', 'Food Bank']
-  },
-  {
-    id: '4',
-    name: 'London Central Mosque',
-    address: '146 Park Road, London NW8 7RG, UK',
-    city: 'London',
-    country: 'United Kingdom',
-    latitude: 51.5074,
-    longitude: -0.1278,
-    phone: '+44 20 7724 3363',
-    website: 'https://iccuk.org',
-    description: 'A historic mosque in the heart of London, serving the Muslim community for over 50 years.',
-    facilities: ['Parking', 'Wheelchair Access', 'WiFi', 'Library', 'Cafeteria', 'Bookstore'],
-    prayerTimes: {
-      fajr: '05:40',
-      dhuhr: '12:25',
-      asr: '15:55',
-      maghrib: '18:30',
-      isha: '19:55'
-    },
-    jummahTimes: ['12:30 PM', '1:30 PM'],
-    rating: 4.7,
-    isFavorite: false,
-    capacity: 400,
-    languages: ['English', 'Arabic', 'Urdu', 'Bengali'],
-    services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Islamic Education', 'Marriage Services', 'Funeral Services', 'Community Events']
-  },
-  {
-    id: '5',
-    name: 'Sydney Islamic Centre',
-    address: '321 George Street, Sydney NSW 2000, Australia',
-    city: 'Sydney',
-    country: 'Australia',
-    latitude: -33.8688,
-    longitude: 151.2093,
-    phone: '+61 2 5555 0123',
-    website: 'https://sic.org.au',
-    description: 'A modern Islamic center in Sydney offering comprehensive religious and community services.',
-    facilities: ['Parking', 'Wheelchair Access', 'WiFi', 'Library', 'Cafeteria', 'Childcare', 'Gym'],
-    prayerTimes: {
-      fajr: '05:20',
-      dhuhr: '12:05',
-      asr: '15:35',
-      maghrib: '18:10',
-      isha: '19:35'
-    },
-    jummahTimes: ['12:15 PM', '1:15 PM'],
-    rating: 4.5,
-    isFavorite: false,
-    capacity: 600,
-    languages: ['English', 'Arabic', 'Urdu', 'Indonesian'],
-    services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Islamic Education', 'Youth Programs', 'Community Events']
+// Google Places API types
+interface GooglePlaceResult {
+  place_id: string
+  name: string
+  formatted_address: string
+  geometry: {
+    location: {
+      lat: number
+      lng: number
+    }
   }
-]
-
-const facilities = ['Parking', 'Wheelchair Access', 'WiFi', 'Library', 'Cafeteria', 'Childcare', 'Gym', 'Bookstore']
-const services = ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Islamic Education', 'Marriage Services', 'Funeral Services', 'Youth Programs', 'Community Events']
+  rating?: number
+  user_ratings_total?: number
+  price_level?: number
+  photos?: Array<{
+    photo_reference: string
+    height: number
+    width: number
+  }>
+  opening_hours?: {
+    open_now: boolean
+    weekday_text: string[]
+  }
+  vicinity?: string
+  types: string[]
+}
 
 export default function MosquesPage() {
-  const [mosques, setMosques] = useState<Mosque[]>(sampleMosques)
+  const [mosques, setMosques] = useState<Mosque[]>([])
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [radius, setRadius] = useState([5]) // in kilometers
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [favorites, setFavorites] = useState<string[]>([])
+  const [showMap, setShowMap] = useState(false)
+  const [selectedMosque, setSelectedMosque] = useState<Mosque | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState<'distance' | 'rating' | 'name'>('distance')
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([])
   const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [sortBy, setSortBy] = useState<'distance' | 'rating' | 'name'>('distance')
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null)
-  const [favorites, setFavorites] = useState<string[]>([])
-  const [selectedMosque, setSelectedMosque] = useState<Mosque | null>(null)
+  const [expandedMosque, setExpandedMosque] = useState<string | null>(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const [mapLoaded, setMapLoaded] = useState(false)
+  const mapRef = useRef<HTMLDivElement>(null)
+  const mapInstanceRef = useRef<any>(null)
+  const markersRef = useRef<any[]>([])
+
+  // Filter options
+  const facilities = [
+    'Parking', 'Wifi', 'Wudu Area', 'Women Prayer Area', 'Children Facilities',
+    'Wheelchair Accessible', 'Library', 'Bookshop', 'Cafe', 'Conference Room',
+    'Air Conditioning', 'Sound System', 'Projector', 'Security', 'ATM'
+  ]
+
+  const services = [
+    'Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Arabic Classes',
+    'Islamic Studies', 'Youth Programs', 'Marriage Services', 'Funeral Services',
+    'Community Events', 'Lectures', 'Taraweeh', 'Eid Prayers', 'Ramadan Iftar',
+    'Charity Work', 'Counseling', 'Educational Programs'
+  ]
+
+  // Mock data for demonstration
+  const mockMosques: Mosque[] = [
+    {
+      id: '1',
+      place_id: 'mosque_1',
+      name: 'Masjid Al-Noor',
+      address: '123 Islamic Street, Downtown',
+      city: 'New York',
+      description: 'A beautiful mosque in the heart of downtown with excellent facilities and community programs.',
+      latitude: 40.7128,
+      longitude: -74.0060,
+      rating: 4.8,
+      user_ratings_total: 156,
+      phone: '+1 (555) 123-4567',
+      website: 'https://masjidalnoor.org',
+      email: 'info@masjidalnoor.org',
+      capacity: 500,
+      facilities: ['Parking', 'Wifi', 'Wudu Area', 'Women Prayer Area', 'Children Facilities', 'Library', 'Cafe'],
+      services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Arabic Classes', 'Islamic Studies', 'Youth Programs'],
+      prayerTimes: {
+        fajr: '05:30',
+        dhuhr: '12:15',
+        asr: '15:45',
+        maghrib: '18:20',
+        isha: '19:45',
+        nextPrayer: 'Dhuhr',
+        nextPrayerTime: '12:15'
+      },
+      events: [
+        {
+          id: '1',
+          title: 'Friday Khutbah by Imam Ahmed',
+          date: '2024-01-15',
+          time: '12:30 PM',
+          description: 'Weekly Friday sermon focusing on community unity',
+          type: 'lecture',
+          registrationRequired: false
+        },
+        {
+          id: '2',
+          title: 'Quran Memorization Class',
+          date: '2024-01-16',
+          time: '6:00 PM',
+          description: 'Beginner to advanced Quran memorization classes',
+          type: 'class',
+          registrationRequired: true,
+          maxAttendees: 30,
+          currentAttendees: 25
+        }
+      ],
+      reviews: [
+        {
+          id: '1',
+          userId: 'user1',
+          userName: 'Ahmad Hassan',
+          rating: 5,
+          comment: 'Excellent facilities and very welcoming community. The imam is knowledgeable and the Friday prayers are well organized.',
+          date: '2024-01-10',
+          helpful: 12
+        },
+        {
+          id: '2',
+          userId: 'user2',
+          userName: 'Fatima Ali',
+          rating: 4,
+          comment: 'Great mosque with good parking facilities. The women\'s prayer area is spacious and well-maintained.',
+          date: '2024-01-08',
+          helpful: 8
+        }
+      ],
+      photos: ['/images/mosque1.jpg', '/images/mosque1-2.jpg'],
+      openingHours: {
+        open_now: true,
+        weekday_text: [
+          'Monday: 5:00 AM – 10:00 PM',
+          'Tuesday: 5:00 AM – 10:00 PM',
+          'Wednesday: 5:00 AM – 10:00 PM',
+          'Thursday: 5:00 AM – 10:00 PM',
+          'Friday: 5:00 AM – 10:00 PM',
+          'Saturday: 5:00 AM – 10:00 PM',
+          'Sunday: 5:00 AM – 10:00 PM'
+        ]
+      },
+      socialMedia: {
+        facebook: 'https://facebook.com/masjidalnoor',
+        instagram: 'https://instagram.com/masjidalnoor',
+        twitter: 'https://twitter.com/masjidalnoor'
+      },
+      imam: {
+        name: 'Imam Ahmed Hassan',
+        bio: 'Imam Ahmed has been serving the community for over 15 years with expertise in Islamic jurisprudence and community development.',
+        photo: '/images/imam-ahmed.jpg'
+      },
+      accessibility: {
+        wheelchair_accessible: true,
+        parking: true,
+        wudu_facilities: true,
+        women_prayer_area: true,
+        children_facilities: true
+      }
+    },
+    {
+      id: '2',
+      place_id: 'mosque_2',
+      name: 'Islamic Center of Brooklyn',
+      address: '456 Brooklyn Avenue, Brooklyn',
+      city: 'Brooklyn',
+      description: 'A vibrant Islamic center serving the Brooklyn community with educational programs and social services.',
+      latitude: 40.6782,
+      longitude: -73.9442,
+      rating: 4.6,
+      user_ratings_total: 89,
+      phone: '+1 (555) 987-6543',
+      website: 'https://icbrooklyn.org',
+      email: 'contact@icbrooklyn.org',
+      capacity: 300,
+      facilities: ['Parking', 'Wifi', 'Wudu Area', 'Women Prayer Area', 'Library', 'Conference Room'],
+      services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Islamic Studies', 'Community Events', 'Charity Work'],
+      prayerTimes: {
+        fajr: '05:35',
+        dhuhr: '12:20',
+        asr: '15:50',
+        maghrib: '18:25',
+        isha: '19:50',
+        nextPrayer: 'Dhuhr',
+        nextPrayerTime: '12:20'
+      },
+      events: [
+        {
+          id: '3',
+          title: 'Community Iftar',
+          date: '2024-01-20',
+          time: '6:00 PM',
+          description: 'Monthly community iftar dinner for all families',
+          type: 'community',
+          registrationRequired: true,
+          maxAttendees: 200,
+          currentAttendees: 150
+        }
+      ],
+      reviews: [
+        {
+          id: '3',
+          userId: 'user3',
+          userName: 'Omar Khan',
+          rating: 5,
+          comment: 'Wonderful community center with excellent programs for children and adults.',
+          date: '2024-01-12',
+          helpful: 15
+        }
+      ],
+      photos: ['/images/mosque2.jpg'],
+      openingHours: {
+        open_now: true,
+        weekday_text: [
+          'Monday: 5:00 AM – 9:00 PM',
+          'Tuesday: 5:00 AM – 9:00 PM',
+          'Wednesday: 5:00 AM – 9:00 PM',
+          'Thursday: 5:00 AM – 9:00 PM',
+          'Friday: 5:00 AM – 9:00 PM',
+          'Saturday: 5:00 AM – 9:00 PM',
+          'Sunday: 5:00 AM – 9:00 PM'
+        ]
+      },
+      accessibility: {
+        wheelchair_accessible: true,
+        parking: true,
+        wudu_facilities: true,
+        women_prayer_area: true,
+        children_facilities: true
+      }
+    },
+    {
+      id: '3',
+      place_id: 'mosque_3',
+      name: 'Masjid Al-Iman',
+      address: '789 Queens Boulevard, Queens',
+      city: 'Queens',
+      description: 'A peaceful mosque with traditional architecture and modern amenities, perfect for spiritual reflection.',
+      latitude: 40.7282,
+      longitude: -73.7949,
+      rating: 4.4,
+      user_ratings_total: 67,
+      phone: '+1 (555) 456-7890',
+      website: 'https://masjidaliman.org',
+      capacity: 200,
+      facilities: ['Parking', 'Wudu Area', 'Women Prayer Area', 'Library', 'Air Conditioning'],
+      services: ['Daily Prayers', 'Friday Prayer', 'Quran Classes', 'Islamic Studies', 'Lectures'],
+      prayerTimes: {
+        fajr: '05:40',
+        dhuhr: '12:25',
+        asr: '15:55',
+        maghrib: '18:30',
+        isha: '19:55',
+        nextPrayer: 'Dhuhr',
+        nextPrayerTime: '12:25'
+      },
+      events: [],
+      reviews: [
+        {
+          id: '4',
+          userId: 'user4',
+          userName: 'Sarah Johnson',
+          rating: 4,
+          comment: 'Beautiful mosque with a peaceful atmosphere. The architecture is stunning.',
+          date: '2024-01-05',
+          helpful: 6
+        }
+      ],
+      photos: ['/images/mosque3.jpg'],
+      openingHours: {
+        open_now: true,
+        weekday_text: [
+          'Monday: 5:00 AM – 8:00 PM',
+          'Tuesday: 5:00 AM – 8:00 PM',
+          'Wednesday: 5:00 AM – 8:00 PM',
+          'Thursday: 5:00 AM – 8:00 PM',
+          'Friday: 5:00 AM – 8:00 PM',
+          'Saturday: 5:00 AM – 8:00 PM',
+          'Sunday: 5:00 AM – 8:00 PM'
+        ]
+      },
+      accessibility: {
+        wheelchair_accessible: false,
+        parking: true,
+        wudu_facilities: true,
+        women_prayer_area: true,
+        children_facilities: false
+      }
+    }
+  ]
+
+  // Initialize with mock data
+  useEffect(() => {
+    setMosques(mockMosques)
+  }, [])
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -224,8 +463,19 @@ export default function MosquesPage() {
         },
         (error) => {
           console.error('Error getting location:', error)
+          // Set default location (New York) if geolocation fails
+          setUserLocation({
+            latitude: 40.7128,
+            longitude: -74.0060
+          })
         }
       )
+    } else {
+      // Set default location if geolocation is not supported
+      setUserLocation({
+        latitude: 40.7128,
+        longitude: -74.0060
+      })
     }
   }, [])
 
@@ -245,6 +495,94 @@ export default function MosquesPage() {
       )
     }
   }, [userLocation])
+
+  // Load Google Maps
+  useEffect(() => {
+    const loadGoogleMaps = () => {
+      if ((window as any).google && (window as any).google.maps) {
+        setMapLoaded(true)
+        return
+      }
+
+      const script = document.createElement('script')
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
+      script.async = true
+      script.defer = true
+      script.onload = () => setMapLoaded(true)
+      document.head.appendChild(script)
+    }
+
+    loadGoogleMaps()
+  }, [])
+
+  // Initialize map when component mounts and map is loaded
+  useEffect(() => {
+    if (mapLoaded && mapRef.current && !mapInstanceRef.current && userLocation) {
+      const google = (window as any).google
+      const map = new google.maps.Map(mapRef.current, {
+        center: { lat: userLocation.latitude, lng: userLocation.longitude },
+        zoom: 12,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      })
+      mapInstanceRef.current = map
+
+      // Add user location marker
+      new google.maps.Marker({
+        position: { lat: userLocation.latitude, lng: userLocation.longitude },
+        map: map,
+        title: 'Your Location',
+        icon: {
+          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="8" fill="#3B82F6" stroke="white" stroke-width="2"/>
+              <circle cx="12" cy="12" r="3" fill="white"/>
+            </svg>
+          `),
+          scaledSize: new google.maps.Size(24, 24)
+        }
+      })
+    }
+  }, [mapLoaded, userLocation])
+
+  // Update map markers when mosques change
+  useEffect(() => {
+    if (mapInstanceRef.current && mosques.length > 0) {
+      const google = (window as any).google
+      // Clear existing markers
+      markersRef.current.forEach(marker => marker.setMap(null))
+      markersRef.current = []
+
+      // Add mosque markers
+      mosques.forEach(mosque => {
+        const marker = new google.maps.Marker({
+          position: { lat: mosque.latitude, lng: mosque.longitude },
+          map: mapInstanceRef.current,
+          title: mosque.name,
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="14" fill="#10B981" stroke="white" stroke-width="2"/>
+                <path d="M16 8L20 12H18V20H14V12H12L16 8Z" fill="white"/>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(32, 32)
+          }
+        })
+
+        marker.addListener('click', () => {
+          setSelectedMosque(mosque)
+        })
+
+        markersRef.current.push(marker)
+      })
+    }
+  }, [mosques])
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
     const R = 6371 // Earth's radius in kilometers
@@ -269,7 +607,9 @@ export default function MosquesPage() {
     const matchesServices = selectedServices.length === 0 || 
                            selectedServices.every(service => mosque.services.includes(service))
     
-    return matchesSearch && matchesFacilities && matchesServices
+    const withinRadius = !userLocation || !mosque.distance || mosque.distance <= radius[0]
+    
+    return matchesSearch && matchesFacilities && matchesServices && withinRadius
   }).sort((a, b) => {
     switch (sortBy) {
       case 'distance':
@@ -302,6 +642,49 @@ export default function MosquesPage() {
     return `${distance.toFixed(1)}km`
   }
 
+  const getPrayerTimeIcon = (prayer: string) => {
+    const prayerIcons: { [key: string]: any } = {
+      fajr: Clock3Icon,
+      dhuhr: Clock12Icon,
+      asr: Clock3Icon,
+      maghrib: Clock6Icon,
+      isha: Clock9Icon
+    }
+    return prayerIcons[prayer] || ClockIcon
+  }
+
+  const getEventTypeIcon = (type: string) => {
+    const eventIcons: { [key: string]: any } = {
+      lecture: MicIcon,
+      class: GraduationCapIcon,
+      event: CalendarIcon,
+      prayer: ClockIcon,
+      community: UsersIcon
+    }
+    return eventIcons[type] || CalendarIcon
+  }
+
+  const getFacilityIcon = (facility: string) => {
+    const facilityIcons: { [key: string]: any } = {
+      'Parking': CarIcon,
+      'Wifi': WifiIcon,
+      'Wudu Area': HandIcon,
+      'Women Prayer Area': UsersIcon,
+      'Children Facilities': BabyIcon,
+      'Wheelchair Accessible': AccessibilityIcon,
+      'Library': BookOpenIcon,
+      'Bookshop': ShoppingBagIcon,
+      'Cafe': CoffeeIcon,
+      'Conference Room': VideoIcon,
+      'Air Conditioning': SettingsIcon,
+      'Sound System': MicIcon,
+      'Projector': CameraIcon,
+      'Security': SettingsIcon,
+      'ATM': SettingsIcon
+    }
+    return facilityIcons[facility] || SettingsIcon
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary-50/30 to-secondary-50/30">
       <div className="container mx-auto px-4 py-8">
@@ -319,10 +702,20 @@ export default function MosquesPage() {
         <div className="mb-8">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <SearchIcon className="h-6 w-6" />
-                Search & Filter
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <SearchIcon className="h-6 w-6" />
+                  Search & Filter
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <FilterIcon className="h-4 w-4 mr-2" />
+                  {showFilters ? 'Hide Filters' : 'Show Filters'}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -335,6 +728,21 @@ export default function MosquesPage() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+
+                {/* Radius Slider */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Search Radius: {radius[0]} km
+                  </label>
+                  <Slider
+                    value={radius}
+                    onValueChange={setRadius}
+                    max={50}
+                    min={1}
+                    step={1}
+                    className="w-full"
                   />
                 </div>
 
@@ -352,55 +760,124 @@ export default function MosquesPage() {
                   </select>
                 </div>
 
-                {/* Facilities Filter */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Facilities</label>
-                  <div className="flex flex-wrap gap-2">
-                    {facilities.map((facility) => (
-                      <Button
-                        key={facility}
-                        variant={selectedFacilities.includes(facility) ? "islamic" : "outline"}
-                        size="sm"
-                        onClick={() => {
-                          setSelectedFacilities(prev => 
-                            prev.includes(facility)
-                              ? prev.filter(f => f !== facility)
-                              : [...prev, facility]
-                          )
-                        }}
-                      >
-                        {facility}
-                      </Button>
-                    ))}
-                  </div>
+                {/* Map Toggle */}
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant={showMap ? "islamic" : "outline"}
+                    onClick={() => setShowMap(!showMap)}
+                    className="flex items-center gap-2"
+                  >
+                    <MapIcon className="h-4 w-4" />
+                    {showMap ? 'Hide Map' : 'Show Map'}
+                  </Button>
+                  {userLocation && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (mapInstanceRef.current) {
+                          mapInstanceRef.current.setCenter({
+                            lat: userLocation.latitude,
+                            lng: userLocation.longitude
+                          })
+                          mapInstanceRef.current.setZoom(12)
+                        }
+                      }}
+                    >
+                      <LocateIcon className="h-4 w-4 mr-2" />
+                      My Location
+                    </Button>
+                  )}
                 </div>
 
-                {/* Services Filter */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Services</label>
-                  <div className="flex flex-wrap gap-2">
-                    {services.map((service) => (
-                      <Button
-                        key={service}
-                        variant={selectedServices.includes(service) ? "islamic" : "outline"}
-                        size="sm"
-                        onClick={() => {
-                          setSelectedServices(prev => 
-                            prev.includes(service)
-                              ? prev.filter(s => s !== service)
-                              : [...prev, service]
+                {/* Filters */}
+                {showFilters && (
+                  <div className="space-y-4 pt-4 border-t">
+                    {/* Facilities Filter */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Facilities</label>
+                      <div className="flex flex-wrap gap-2">
+                        {facilities.map((facility) => {
+                          const IconComponent = getFacilityIcon(facility)
+                          return (
+                            <Button
+                              key={facility}
+                              variant={selectedFacilities.includes(facility) ? "islamic" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                setSelectedFacilities(prev => 
+                                  prev.includes(facility)
+                                    ? prev.filter(f => f !== facility)
+                                    : [...prev, facility]
+                                )
+                              }}
+                              className="flex items-center gap-1"
+                            >
+                              <IconComponent className="h-3 w-3" />
+                              {facility}
+                            </Button>
                           )
-                        }}
-                      >
-                        {service}
-                      </Button>
-                    ))}
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Services Filter */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Services</label>
+                      <div className="flex flex-wrap gap-2">
+                        {services.map((service) => (
+                          <Button
+                            key={service}
+                            variant={selectedServices.includes(service) ? "islamic" : "outline"}
+                            size="sm"
+                            onClick={() => {
+                              setSelectedServices(prev => 
+                                prev.includes(service)
+                                  ? prev.filter(s => s !== service)
+                                  : [...prev, service]
+                              )
+                            }}
+                          >
+                            {service}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Map View */}
+        {showMap && (
+          <div className="mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapIcon className="h-6 w-6" />
+                  Interactive Map
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  ref={mapRef} 
+                  className="w-full h-96 rounded-lg border"
+                  style={{ minHeight: '400px' }}
+                />
+                {!mapLoaded && (
+                  <div className="flex items-center justify-center h-96 bg-muted/50 rounded-lg">
+                    <div className="text-center">
+                      <LoaderIcon className="h-8 w-8 animate-spin mx-auto mb-2" />
+                      <p className="text-muted-foreground">Loading map...</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Mosques List */}
         <div className="space-y-6">
@@ -416,18 +893,25 @@ export default function MosquesPage() {
                         <div className="flex items-center gap-1">
                           <StarIcon className="h-4 w-4 text-yellow-500" />
                           <span className="text-sm font-medium">{mosque.rating}</span>
+                          <span className="text-xs text-muted-foreground">({mosque.user_ratings_total})</span>
                         </div>
                       </div>
                       
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                         <div className="flex items-center gap-1">
                           <MapPinIcon className="h-4 w-4" />
-                          <span>{mosque.address}</span>
+                          <span>{mosque.address}, {mosque.city}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <NavigationIcon className="h-4 w-4" />
                           <span>{formatDistance(mosque.distance)}</span>
                         </div>
+                        {mosque.capacity && (
+                          <div className="flex items-center gap-1">
+                            <UsersIcon className="h-4 w-4" />
+                            <span>Capacity: {mosque.capacity}</span>
+                          </div>
+                        )}
                       </div>
                       
                       <p className="text-muted-foreground text-sm">{mosque.description}</p>
@@ -455,31 +939,62 @@ export default function MosquesPage() {
                         <ArrowRightIcon className="h-4 w-4 mr-2" />
                         Directions
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedMosque(expandedMosque === mosque.id ? null : mosque.id)}
+                      >
+                        {expandedMosque === mosque.id ? (
+                          <ChevronUpIcon className="h-4 w-4" />
+                        ) : (
+                          <ChevronDownIcon className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
                   </div>
 
                   {/* Prayer Times */}
                   <div className="grid grid-cols-5 gap-2">
-                    {Object.entries(mosque.prayerTimes).map(([prayer, time]) => (
-                      <div key={prayer} className="text-center p-2 bg-primary/5 rounded">
-                        <div className="text-xs font-medium text-muted-foreground capitalize">{prayer}</div>
-                        <div className="text-sm font-semibold text-primary">{time}</div>
-                      </div>
-                    ))}
+                    {Object.entries(mosque.prayerTimes).map(([prayer, time]) => {
+                      const IconComponent = getPrayerTimeIcon(prayer)
+                      const isNextPrayer = prayer === mosque.prayerTimes.nextPrayer?.toLowerCase()
+                      return (
+                        <div 
+                          key={prayer} 
+                          className={`text-center p-2 rounded ${
+                            isNextPrayer 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-primary/5'
+                          }`}
+                        >
+                          <IconComponent className={`h-4 w-4 mx-auto mb-1 ${
+                            isNextPrayer ? 'text-primary-foreground' : 'text-primary'
+                          }`} />
+                          <div className="text-xs font-medium capitalize">{prayer}</div>
+                          <div className={`text-sm font-semibold ${
+                            isNextPrayer ? 'text-primary-foreground' : 'text-primary'
+                          }`}>{time}</div>
+                        </div>
+                      )
+                    })}
                   </div>
 
                   {/* Facilities */}
                   <div>
                     <h4 className="text-sm font-medium mb-2">Facilities</h4>
                     <div className="flex flex-wrap gap-1">
-                      {mosque.facilities.map((facility) => (
-                        <span
-                          key={facility}
-                          className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                        >
-                          {facility}
-                        </span>
-                      ))}
+                      {mosque.facilities.map((facility) => {
+                        const IconComponent = getFacilityIcon(facility)
+                        return (
+                          <span
+                            key={facility}
+                            className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full flex items-center gap-1"
+                          >
+                            <IconComponent className="h-3 w-3" />
+                            {facility}
+                          </span>
+                        )
+                      })}
                     </div>
                   </div>
 
@@ -488,7 +1003,9 @@ export default function MosquesPage() {
                     {mosque.phone && (
                       <div className="flex items-center gap-1">
                         <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>{mosque.phone}</span>
+                        <a href={`tel:${mosque.phone}`} className="text-primary hover:underline">
+                          {mosque.phone}
+                        </a>
                       </div>
                     )}
                     {mosque.website && (
@@ -499,13 +1016,148 @@ export default function MosquesPage() {
                         </a>
                       </div>
                     )}
-                    {mosque.capacity && (
+                    {mosque.email && (
                       <div className="flex items-center gap-1">
-                        <UsersIcon className="h-4 w-4 text-muted-foreground" />
-                        <span>Capacity: {mosque.capacity}</span>
+                        <GlobeIcon className="h-4 w-4 text-muted-foreground" />
+                        <a href={`mailto:${mosque.email}`} className="text-primary hover:underline">
+                          Email
+                        </a>
                       </div>
                     )}
                   </div>
+
+                  {/* Expanded Details */}
+                  {expandedMosque === mosque.id && (
+                    <div className="space-y-4 pt-4 border-t">
+                      {/* Imam Information */}
+                      {mosque.imam && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Imam</h4>
+                          <div className="flex items-start gap-3">
+                            {mosque.imam.photo && (
+                              <img 
+                                src={mosque.imam.photo} 
+                                alt={mosque.imam.name}
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium">{mosque.imam.name}</p>
+                              <p className="text-sm text-muted-foreground">{mosque.imam.bio}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Events */}
+                      {mosque.events.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Upcoming Events</h4>
+                          <div className="space-y-2">
+                            {mosque.events.slice(0, 3).map((event) => {
+                              const EventIcon = getEventTypeIcon(event.type)
+                              return (
+                                <div key={event.id} className="flex items-start gap-2 p-2 bg-muted/50 rounded">
+                                  <EventIcon className="h-4 w-4 text-primary mt-0.5" />
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium">{event.title}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {event.date} at {event.time}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">{event.description}</p>
+                                    {event.registrationRequired && (
+                                      <span className="inline-block mt-1 px-2 py-0.5 bg-primary/10 text-primary text-xs rounded">
+                                        Registration Required
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Reviews */}
+                      {mosque.reviews.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Recent Reviews</h4>
+                          <div className="space-y-2">
+                            {mosque.reviews.slice(0, 2).map((review) => (
+                              <div key={review.id} className="p-3 bg-muted/50 rounded">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="text-sm font-medium">{review.userName}</p>
+                                  <div className="flex items-center gap-1">
+                                    {[...Array(5)].map((_, i) => (
+                                      <StarIcon 
+                                        key={i} 
+                                        className={`h-3 w-3 ${
+                                          i < review.rating ? 'text-yellow-500 fill-current' : 'text-muted-foreground'
+                                        }`} 
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                                <p className="text-sm text-muted-foreground">{review.comment}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{review.date}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Social Media */}
+                      {mosque.socialMedia && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Social Media</h4>
+                          <div className="flex gap-2">
+                            {mosque.socialMedia.facebook && (
+                              <a 
+                                href={mosque.socialMedia.facebook} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                              >
+                                <GlobeIcon className="h-4 w-4" />
+                              </a>
+                            )}
+                            {mosque.socialMedia.instagram && (
+                              <a 
+                                href={mosque.socialMedia.instagram} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="p-2 bg-pink-100 text-pink-600 rounded hover:bg-pink-200"
+                              >
+                                <GlobeIcon className="h-4 w-4" />
+                              </a>
+                            )}
+                            {mosque.socialMedia.twitter && (
+                              <a 
+                                href={mosque.socialMedia.twitter} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                              >
+                                <GlobeIcon className="h-4 w-4" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Opening Hours */}
+                      {mosque.openingHours && (
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Opening Hours</h4>
+                          <div className="text-sm text-muted-foreground">
+                            {mosque.openingHours.weekday_text.map((day, index) => (
+                              <p key={index}>{day}</p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -532,6 +1184,7 @@ export default function MosquesPage() {
                   setSearchTerm('')
                   setSelectedFacilities([])
                   setSelectedServices([])
+                  setRadius([5])
                 }}
               >
                 Clear Filters
