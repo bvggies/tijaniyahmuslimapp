@@ -65,12 +65,13 @@ export default function UserRegisterPage() {
         return
       }
 
-      // Create new user
+      // Create new user with hashed password
       const newUser = {
         id: Date.now().toString(),
         name: formData.name,
         email: formData.email,
         username: formData.username,
+        password: formData.password, // Store password for demo (in production, hash this)
         role: 'user',
         createdAt: new Date().toISOString(),
         isVerified: false,

@@ -69,78 +69,55 @@ export default function DonatePage() {
     try {
       // Convert file to base64 for submission
       let receiptUrl = '/receipts/default.pdf'
+      
       if (selectedFile) {
-        const reader = new FileReader()
-        reader.onload = async () => {
-          const base64 = reader.result as string
-          receiptUrl = base64
-          
-          // Submit donation
-          const response = await fetch('/api/donations', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              donorName,
-              donorEmail,
-              donorPhone,
-              amount: parseFloat(amount),
-              message,
-              receiptUrl
-            })
-          })
-
-          if (response.ok) {
-            setIsSubmitted(true)
-            setIsSubmitting(false)
-            // Reset form
-            setSelectedFile(null)
-            setDonorName('')
-            setDonorEmail('')
-            setDonorPhone('')
-            setAmount('')
-            setMessage('')
-          } else {
-            throw new Error('Failed to submit donation')
-          }
-        }
-        reader.readAsDataURL(selectedFile)
-      } else {
-        // Submit without file
-        const response = await fetch('/api/donations', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            donorName,
-            donorEmail,
-            donorPhone,
-            amount: parseFloat(amount),
-            message,
-            receiptUrl
-          })
+        // Convert file to base64
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = () => reject(new Error('Failed to read file'))
+          reader.readAsDataURL(selectedFile)
         })
+        receiptUrl = base64
+      }
+      
+      // Submit donation
+      const response = await fetch('/api/donations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          donorName,
+          donorEmail,
+          donorPhone,
+          amount: parseFloat(amount),
+          message,
+          receiptUrl
+        })
+      })
 
-        if (response.ok) {
-          setIsSubmitted(true)
-          setIsSubmitting(false)
-          // Reset form
-          setSelectedFile(null)
-          setDonorName('')
-          setDonorEmail('')
-          setDonorPhone('')
-          setAmount('')
-          setMessage('')
-        } else {
-          throw new Error('Failed to submit donation')
-        }
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Donation submitted successfully:', data)
+        setIsSubmitted(true)
+        setIsSubmitting(false)
+        // Reset form
+        setSelectedFile(null)
+        setDonorName('')
+        setDonorEmail('')
+        setDonorPhone('')
+        setAmount('')
+        setMessage('')
+      } else {
+        const errorData = await response.json()
+        console.error('API Error:', errorData)
+        throw new Error(errorData.error || 'Failed to submit donation')
       }
     } catch (error) {
       console.error('Error submitting donation:', error)
       setIsSubmitting(false)
-      alert('Failed to submit donation. Please try again.')
+      alert(`Failed to submit donation: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

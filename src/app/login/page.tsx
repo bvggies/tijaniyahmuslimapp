@@ -34,7 +34,8 @@ export default function UserLoginPage() {
 
     // Simulate user authentication
     setTimeout(() => {
-      const validCredentials = {
+      // Check hardcoded demo users first
+      const demoCredentials = {
         'user@example.com': { password: 'user123', name: 'Ahmad Hassan', username: 'ahmad_hassan', role: 'user' },
         'fatima@example.com': { password: 'fatima123', name: 'Fatima Al-Zahra', username: 'fatima_z', role: 'user' },
         'omar@example.com': { password: 'omar123', name: 'Omar Abdullah', username: 'omar_a', role: 'user' },
@@ -42,7 +43,22 @@ export default function UserLoginPage() {
         'yusuf@example.com': { password: 'yusuf123', name: 'Yusuf Ibrahim', username: 'yusuf_i', role: 'user' }
       }
 
-      const user = validCredentials[credentials.email as keyof typeof validCredentials]
+      let user = demoCredentials[credentials.email as keyof typeof demoCredentials]
+      
+      // If not found in demo users, check registered users
+      if (!user) {
+        const registeredUsers = JSON.parse(localStorage.getItem('registered-users') || '[]')
+        const registeredUser = registeredUsers.find((u: any) => u.email === credentials.email)
+        
+        if (registeredUser && registeredUser.password === credentials.password) {
+          user = {
+            password: registeredUser.password,
+            name: registeredUser.name,
+            username: registeredUser.username,
+            role: registeredUser.role || 'user'
+          }
+        }
+      }
       
       if (user && user.password === credentials.password) {
         localStorage.setItem('user-token', 'user-token-' + Date.now())
