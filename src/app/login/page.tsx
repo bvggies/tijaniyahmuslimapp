@@ -32,41 +32,25 @@ export default function UserLoginPage() {
     setIsLoading(true)
     setError('')
 
-    // Simulate user authentication
-    setTimeout(() => {
-      // Check hardcoded demo users first
-      const demoCredentials = {
-        'user@example.com': { password: 'user123', name: 'Ahmad Hassan', username: 'ahmad_hassan', role: 'user' },
-        'fatima@example.com': { password: 'fatima123', name: 'Fatima Al-Zahra', username: 'fatima_z', role: 'user' },
-        'omar@example.com': { password: 'omar123', name: 'Omar Abdullah', username: 'omar_a', role: 'user' },
-        'aisha@example.com': { password: 'aisha123', name: 'Aisha Rahman', username: 'aisha_r', role: 'user' },
-        'yusuf@example.com': { password: 'yusuf123', name: 'Yusuf Ibrahim', username: 'yusuf_i', role: 'user' }
-      }
+    // Authenticate user via API
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password
+        })
+      })
 
-      let user = demoCredentials[credentials.email as keyof typeof demoCredentials]
-      
-      // If not found in demo users, check registered users
-      if (!user) {
-        const registeredUsers = JSON.parse(localStorage.getItem('registered-users') || '[]')
-        const registeredUser = registeredUsers.find((u: any) => u.email === credentials.email)
-        
-        if (registeredUser && registeredUser.password === credentials.password) {
-          user = {
-            password: registeredUser.password,
-            name: registeredUser.name,
-            username: registeredUser.username,
-            role: registeredUser.role || 'user'
-          }
-        }
-      }
-      
-      if (user && user.password === credentials.password) {
+      const data = await response.json()
+
+      if (data.success) {
         localStorage.setItem('user-token', 'user-token-' + Date.now())
         localStorage.setItem('user-data', JSON.stringify({
-          email: credentials.email,
-          name: user.name,
-          username: user.username,
-          role: user.role,
+          ...data.data,
           lastLogin: new Date().toISOString(),
           isVerified: true,
           preferences: {
@@ -77,10 +61,14 @@ export default function UserLoginPage() {
         }))
         router.push('/')
       } else {
-        setError('Invalid email or password')
+        setError(data.error || 'Invalid email or password')
       }
       setIsLoading(false)
-    }, 1000)
+    } catch (error) {
+      console.error('Login error:', error)
+      setError('Login failed. Please try again.')
+      setIsLoading(false)
+    }
   }
 
   return (

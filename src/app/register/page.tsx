@@ -51,49 +51,40 @@ export default function UserRegisterPage() {
       return
     }
 
-    // Simulate user registration
-    setTimeout(() => {
-      // Check if user already exists
-      const existingUsers = JSON.parse(localStorage.getItem('registered-users') || '[]')
-      const userExists = existingUsers.some((user: any) => 
-        user.email === formData.email || user.username === formData.username
-      )
+    // Register user via API
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          username: formData.username,
+          password: formData.password
+        })
+      })
 
-      if (userExists) {
-        setError('User with this email or username already exists')
+      const data = await response.json()
+
+      if (data.success) {
+        setSuccess(true)
         setIsLoading(false)
-        return
+
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          router.push('/login')
+        }, 2000)
+      } else {
+        setError(data.error || 'Registration failed')
+        setIsLoading(false)
       }
-
-      // Create new user with hashed password
-      const newUser = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        username: formData.username,
-        password: formData.password, // Store password for demo (in production, hash this)
-        role: 'user',
-        createdAt: new Date().toISOString(),
-        isVerified: false,
-        preferences: {
-          language: 'English',
-          timezone: 'UTC',
-          notifications: true
-        }
-      }
-
-      // Save to localStorage
-      const updatedUsers = [...existingUsers, newUser]
-      localStorage.setItem('registered-users', JSON.stringify(updatedUsers))
-
-      setSuccess(true)
+    } catch (error) {
+      console.error('Registration error:', error)
+      setError('Registration failed. Please try again.')
       setIsLoading(false)
-
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        router.push('/login')
-      }, 2000)
-    }, 1500)
+    }
   }
 
   if (success) {

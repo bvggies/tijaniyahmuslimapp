@@ -132,7 +132,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-30 bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg">
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-background/95 via-background/98 to-background/95 backdrop-blur-xl border-b border-border/50 shadow-lg">
         <div className="flex items-center justify-between p-4">
           {/* Logo and Title */}
           <div className="flex items-center gap-4">

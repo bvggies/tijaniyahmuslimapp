@@ -164,12 +164,17 @@ export default function DonationsPage() {
   }
 
   const handleViewReceipt = (receiptUrl: string) => {
+    console.log('Viewing receipt:', receiptUrl)
+    
     if (receiptUrl.startsWith('data:')) {
       // It's a base64 data URL, show in modal
       setSelectedReceipt(receiptUrl)
-    } else {
+    } else if (receiptUrl.startsWith('http') || receiptUrl.startsWith('/')) {
       // It's a regular URL, open in new tab
       window.open(receiptUrl, '_blank')
+    } else {
+      // Fallback: show in modal even if it's not a data URL
+      setSelectedReceipt(receiptUrl)
     }
   }
 
@@ -398,16 +403,45 @@ export default function DonationsPage() {
               </Button>
             </div>
             <div className="p-4 overflow-auto max-h-[70vh]">
-              <img
-                src={selectedReceipt}
-                alt="Payment Receipt"
-                className="max-w-full h-auto rounded-lg border"
-                onError={(e) => {
-                  console.error('Error loading receipt image:', e)
-                  e.currentTarget.style.display = 'none'
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden')
-                }}
-              />
+              {selectedReceipt.startsWith('data:') ? (
+                <img
+                  src={selectedReceipt}
+                  alt="Payment Receipt"
+                  className="max-w-full h-auto rounded-lg border"
+                  onError={(e) => {
+                    console.error('Error loading receipt image:', e)
+                    e.currentTarget.style.display = 'none'
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                  }}
+                />
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  <FileTextIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+                  <p className="text-lg font-medium mb-2">Receipt File</p>
+                  <p className="text-sm mb-4">This receipt was uploaded as a file</p>
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => window.open(selectedReceipt, '_blank')}
+                    >
+                      <EyeIcon className="h-4 w-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const link = document.createElement('a')
+                        link.href = selectedReceipt
+                        link.download = 'receipt.pdf'
+                        link.click()
+                      }}
+                    >
+                      <DownloadIcon className="h-4 w-4 mr-2" />
+                      Download Receipt
+                    </Button>
+                  </div>
+                </div>
+              )}
               <div className="hidden text-center text-muted-foreground mt-4">
                 <p>Unable to load receipt image</p>
                 <Button
