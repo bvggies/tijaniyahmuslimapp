@@ -433,10 +433,15 @@ export default function MosquesPage() {
     }
   ]
 
-  // Initialize with mock data
+  // Initialize with mock data and search for real mosques
   useEffect(() => {
     setMosques(mockMosques)
-  }, [])
+    
+    // Search for real mosques when user location is available
+    if (userLocation) {
+      searchNearbyMosques(userLocation.latitude, userLocation.longitude, radius[0])
+    }
+  }, [userLocation, radius])
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -636,6 +641,89 @@ export default function MosquesPage() {
     return R * c
   }
 
+  // Search for nearby mosques using Google Places API
+  const searchNearbyMosques = async (lat: number, lng: number, radiusKm: number) => {
+    if (!(window as any).google || !(window as any).google.maps) {
+      console.log('Google Maps not loaded yet')
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const google = (window as any).google
+      const service = new google.maps.places.PlacesService(document.createElement('div'))
+      
+      const request = {
+        location: new google.maps.LatLng(lat, lng),
+        radius: radiusKm * 1000, // Convert km to meters
+        type: 'place_of_worship',
+        keyword: 'mosque masjid islamic center'
+      }
+
+      service.nearbySearch(request, (results: any[], status: any) => {
+        setIsLoading(false)
+        
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+          console.log('Found mosques:', results.length)
+          
+          // Convert Google Places results to our Mosque format
+          const foundMosques: Mosque[] = results.map((place, index) => ({
+            id: `google_${place.place_id || index}`,
+            place_id: place.place_id || `place_${index}`,
+            name: place.name || 'Mosque',
+            address: place.vicinity || place.formatted_address || 'Address not available',
+            city: place.vicinity || 'Unknown',
+            description: 'Islamic place of worship',
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng(),
+            rating: place.rating || 0,
+            user_ratings_total: place.user_ratings_total || 0,
+            distance: calculateDistance(lat, lng, place.geometry.location.lat(), place.geometry.location.lng()),
+            facilities: ['Prayer Area', 'Wudu Area'],
+            services: ['Daily Prayers', 'Friday Prayer'],
+            prayerTimes: {
+              fajr: '05:30',
+              dhuhr: '12:15',
+              asr: '15:45',
+              maghrib: '18:20',
+              isha: '19:45',
+              nextPrayer: 'Dhuhr',
+              nextPrayerTime: '12:15'
+            },
+            events: [],
+            reviews: [],
+            accessibility: {
+              wheelchair_accessible: false,
+              parking: true,
+              wudu_facilities: true,
+              women_prayer_area: true,
+              children_facilities: false
+            }
+          }))
+
+          // Combine with mock data and update
+          setMosques(prevMosques => {
+            const combined = [...prevMosques, ...foundMosques]
+            // Remove duplicates based on place_id
+            const unique = combined.filter((mosque, index, self) => 
+              index === self.findIndex(m => m.place_id === mosque.place_id)
+            )
+            return unique
+          })
+        } else {
+          console.log('No mosques found or error:', status)
+          setError('No mosques found in your area. Try increasing the search radius.')
+        }
+      })
+    } catch (error) {
+      console.error('Error searching for mosques:', error)
+      setIsLoading(false)
+      setError('Failed to search for mosques. Please try again.')
+    }
+  }
+
   const filteredMosques = mosques.filter(mosque => {
     const matchesSearch = mosque.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          mosque.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -801,8 +889,8 @@ export default function MosquesPage() {
                   </select>
                 </div>
 
-                {/* Map Toggle */}
-                <div className="flex items-center gap-4">
+                {/* Action Buttons */}
+                <div className="flex items-center gap-4 flex-wrap">
                   <Button
                     variant={showMap ? "islamic" : "outline"}
                     onClick={() => setShowMap(!showMap)}
@@ -811,23 +899,43 @@ export default function MosquesPage() {
                     <MapIcon className="h-4 w-4" />
                     {showMap ? 'Hide Map' : 'Show Map'}
                   </Button>
+                  
                   {userLocation && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        if (mapInstanceRef.current) {
-                          mapInstanceRef.current.setCenter({
-                            lat: userLocation.latitude,
-                            lng: userLocation.longitude
-                          })
-                          mapInstanceRef.current.setZoom(12)
-                        }
-                      }}
-                    >
-                      <LocateIcon className="h-4 w-4 mr-2" />
-                      My Location
-                    </Button>
+                    <>
+                      <Button
+                        variant="islamic"
+                        size="sm"
+                        onClick={() => {
+                          searchNearbyMosques(userLocation.latitude, userLocation.longitude, radius[0])
+                        }}
+                        disabled={isLoading}
+                        className="flex items-center gap-2"
+                      >
+                        {isLoading ? (
+                          <LoaderIcon className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <SearchIcon className="h-4 w-4" />
+                        )}
+                        {isLoading ? 'Searching...' : 'Search Mosques'}
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (mapInstanceRef.current) {
+                            mapInstanceRef.current.setCenter({
+                              lat: userLocation.latitude,
+                              lng: userLocation.longitude
+                            })
+                            mapInstanceRef.current.setZoom(12)
+                          }
+                        }}
+                      >
+                        <LocateIcon className="h-4 w-4 mr-2" />
+                        My Location
+                      </Button>
+                    </>
                   )}
                 </div>
 
@@ -973,9 +1081,20 @@ export default function MosquesPage() {
           </div>
         )}
 
+        {/* Loading State */}
+        {isLoading && (
+          <Card>
+            <CardContent className="text-center py-12">
+              <LoaderIcon className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+              <h3 className="text-lg font-semibold mb-2">Searching for Mosques</h3>
+              <p className="text-muted-foreground">Finding nearby Islamic places of worship...</p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Mosques List */}
         <div className="space-y-6">
-          {filteredMosques.map((mosque) => (
+          {!isLoading && filteredMosques.map((mosque) => (
             <Card key={mosque.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="space-y-4">
@@ -1259,7 +1378,7 @@ export default function MosquesPage() {
         </div>
 
         {/* Empty State */}
-        {filteredMosques.length === 0 && (
+        {!isLoading && filteredMosques.length === 0 && (
           <Card>
             <CardContent className="text-center py-12">
               <MapPinIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -1269,20 +1388,34 @@ export default function MosquesPage() {
               <p className="text-muted-foreground mb-4">
                 {searchTerm || selectedFacilities.length > 0 || selectedServices.length > 0
                   ? 'Try adjusting your search or filters'
-                  : 'No mosques available in your area'
+                  : userLocation 
+                    ? 'No mosques found in your area. Try increasing the search radius or click "Search Mosques" to find nearby places.'
+                    : 'Please allow location access to find nearby mosques'
                 }
               </p>
-              <Button
-                variant="islamic"
-                onClick={() => {
-                  setSearchTerm('')
-                  setSelectedFacilities([])
-                  setSelectedServices([])
-                  setRadius([5])
-                }}
-              >
-                Clear Filters
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  variant="islamic"
+                  onClick={() => {
+                    setSearchTerm('')
+                    setSelectedFacilities([])
+                    setSelectedServices([])
+                    setRadius([5])
+                  }}
+                >
+                  Clear Filters
+                </Button>
+                {userLocation && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      searchNearbyMosques(userLocation.latitude, userLocation.longitude, radius[0])
+                    }}
+                  >
+                    Search Again
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
         )}
