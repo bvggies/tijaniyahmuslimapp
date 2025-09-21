@@ -505,13 +505,20 @@ export default function MosquesPage() {
       }
 
       // Check if API key is available
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+      let apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+      
+      // Fallback to hardcoded key for testing (remove this in production)
+      if (!apiKey) {
+        apiKey = 'AIzaSyA33uqq6GbVibMLrfMkCqizA5lzpphDplo'
+        console.warn('Using fallback API key. Please configure NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in Vercel.')
+      }
+      
       console.log('Google Maps API Key:', apiKey ? 'Present' : 'Missing')
       console.log('API Key value:', apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined')
       
       if (!apiKey) {
         console.warn('Google Maps API key not found. Map functionality will be limited.')
-        setError('Google Maps API key not configured. Please contact administrator.')
+        setError('Google Maps API key not configured. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your Vercel environment variables.')
         return
       }
 
@@ -519,9 +526,13 @@ export default function MosquesPage() {
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
       script.async = true
       script.defer = true
-      script.onload = () => setMapLoaded(true)
-      script.onerror = () => {
-        setError('Failed to load Google Maps. Please check your internet connection.')
+      script.onload = () => {
+        console.log('Google Maps loaded successfully')
+        setMapLoaded(true)
+      }
+      script.onerror = (error) => {
+        console.error('Google Maps failed to load:', error)
+        setError(`Failed to load Google Maps. API Key: ${apiKey ? 'Present' : 'Missing'}. Please check your Vercel environment variables.`)
       }
       document.head.appendChild(script)
     }
