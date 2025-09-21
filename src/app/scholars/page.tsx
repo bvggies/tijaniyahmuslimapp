@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { 
   GraduationCapIcon, 
   SearchIcon,
@@ -192,10 +193,44 @@ const scholars: Scholar[] = [
         category: 'Education'
       }
     ]
+  },
+  {
+    id: '6',
+    name: 'Sheikh Alhaji Abdullahi Ahmad Maikano (R.A)',
+    title: 'Baba Jalloo - Tijaniyya Scholar and Khalifa',
+    specialization: ['Tijaniyya Tariqa', 'Prayer', 'Dhikr', 'Quran', 'Spirituality', 'Tasawwuf'],
+    country: 'Ghana',
+    language: ['Arabic', 'Hausa', 'English'],
+    description: 'A true and faithful scholar whose interest lay mainly in prayers, remembrance of Allah, repentance, and seeking forgiveness. He devoted his whole life to the service of Allah and spreading Tariqatu Tijaniyya.',
+    image: 'https://drive.google.com/uc?export=view&id=1XBGxf5ypoABMNk2-fX07UVsJeTMXsUve',
+    rating: 5.0,
+    isFavorite: false,
+    lectures: [
+      {
+        id: '7',
+        title: 'The Importance of Dhikr in Tijaniyya',
+        duration: '45 min',
+        description: 'Deep insights into the practice of remembrance of Allah in the Tijaniyya tradition.',
+        url: 'https://youtube.com/watch?v=example7',
+        views: 250000,
+        date: new Date('2004-06-15'),
+        category: 'Spirituality'
+      },
+      {
+        id: '8',
+        title: 'Spreading Tariqatu Tijaniyya in West Africa',
+        duration: '60 min',
+        description: 'Historical account of the establishment and growth of Tijaniyya in Ghana and West Africa.',
+        url: 'https://youtube.com/watch?v=example8',
+        views: 180000,
+        date: new Date('2003-09-20'),
+        category: 'History'
+      }
+    ]
   }
 ]
 
-const specializations = ['All', 'Quran', 'Hadith', 'Fiqh', 'Tafsir', 'Seerah', 'Aqeedah', 'History', 'Spirituality', 'Social Justice', 'Interfaith Dialogue', 'Education']
+const specializations = ['All', 'Quran', 'Hadith', 'Fiqh', 'Tafsir', 'Seerah', 'Aqeedah', 'History', 'Spirituality', 'Social Justice', 'Interfaith Dialogue', 'Education', 'Tijaniyya Tariqa', 'Prayer', 'Dhikr', 'Tasawwuf']
 
 const categories = ['All', 'Quran', 'Prayer', 'Seerah', 'Community', 'Interfaith', 'Education', 'Spirituality']
 
@@ -321,7 +356,13 @@ export default function ScholarsPage() {
         {/* Scholars Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredScholars.map((scholar) => (
-            <Card key={scholar.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedScholar(scholar)}>
+            <Card key={scholar.id} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => {
+              if (scholar.id === '6') {
+                window.location.href = '/scholars/sheikh-abdullahi-maikano'
+              } else {
+                setSelectedScholar(scholar)
+              }
+            }}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -331,6 +372,12 @@ export default function ScholarsPage() {
                     <div>
                       <CardTitle className="text-lg">{scholar.name}</CardTitle>
                       <CardDescription>{scholar.title}</CardDescription>
+                      {scholar.id === '6' && (
+                        <Badge variant="secondary" className="mt-1 text-xs">
+                          <BookOpenIcon className="h-3 w-3 mr-1" />
+                          Detailed Biography
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <Button
