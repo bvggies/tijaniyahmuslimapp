@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { registerServiceWorker, setupInstallPrompt, setupBackgroundSync } from '@/lib/pwa'
+import { registerServiceWorker, setupInstallPrompt, setupBackgroundSync, setupVisibilityUpdateCheck } from '@/lib/pwa'
 
 export function PWAInitializer() {
   useEffect(() => {
@@ -10,6 +10,7 @@ export function PWAInitializer() {
       registerServiceWorker()
       setupInstallPrompt()
       setupBackgroundSync()
+      setupVisibilityUpdateCheck()
     } catch (error) {
       console.warn('PWA initialization failed:', error)
     }

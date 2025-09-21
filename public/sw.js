@@ -1,4 +1,6 @@
-const CACHE_NAME = 'tijaniyah-muslim-app-v1';
+// Dynamic cache version based on build timestamp
+const BUILD_VERSION = new Date().getTime();
+const CACHE_NAME = `tijaniyah-muslim-app-v${BUILD_VERSION}`;
 const urlsToCache = [
   '/',
   '/prayer-times',
@@ -22,13 +24,18 @@ const urlsToCache = [
   '/manifest.json'
 ];
 
-// Install event - cache resources
+// Install event - cache resources and skip waiting
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        // Skip waiting to activate immediately
+        return self.skipWaiting();
       })
   );
 });
@@ -62,19 +69,25 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and claim clients
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Claim all clients immediately
+      self.clients.claim()
+    ])
   );
 });
 
@@ -125,6 +138,31 @@ self.addEventListener('notificationclick', (event) => {
   if (event.action === 'explore') {
     event.waitUntil(
       clients.openWindow('/')
+    );
+  }
+});
+
+// Handle messages from the main thread
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'CACHE_INVALIDATE') {
+    // Clear all caches and reload
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName))
+        );
+      }).then(() => {
+        // Notify all clients to reload
+        return self.clients.matchAll().then((clients) => {
+          clients.forEach((client) => {
+            client.postMessage({ type: 'RELOAD' });
+          });
+        });
+      })
     );
   }
 });

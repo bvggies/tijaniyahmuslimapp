@@ -4,6 +4,7 @@ import "./globals.css";
 import { Layout } from "@/components/layout/layout";
 import { PWAInstall } from "@/components/ui/pwa-install";
 import { PWAInitializer } from "@/components/ui/pwa-initializer";
+import { ForceUpdate } from "@/components/ui/force-update";
 import { ClientOnly } from "@/components/ui/client-only";
 import { SplashProvider } from "@/components/providers/splash-provider";
 
@@ -79,6 +80,7 @@ export default function RootLayout({
               </Layout>
               <ClientOnly>
                 <PWAInstall />
+                <ForceUpdate />
               </ClientOnly>
             </SplashProvider>
           </body>
