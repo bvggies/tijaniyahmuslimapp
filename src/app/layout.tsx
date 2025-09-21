@@ -7,6 +7,7 @@ import { PWAInitializer } from "@/components/ui/pwa-initializer";
 import { ForceUpdate } from "@/components/ui/force-update";
 import { ClientOnly } from "@/components/ui/client-only";
 import { SplashProvider } from "@/components/providers/splash-provider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -82,6 +83,7 @@ export default function RootLayout({
                 <PWAInstall />
                 <ForceUpdate />
               </ClientOnly>
+              <SpeedInsights />
             </SplashProvider>
           </body>
         </html>
