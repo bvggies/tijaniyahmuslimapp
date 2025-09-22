@@ -51,6 +51,13 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
 
+  // Close mobile menu when clicking outside
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsMobileMenuOpen(false)
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="container flex h-14 items-center justify-between px-3">
@@ -119,7 +126,11 @@ export function Header() {
 
       {/* Mobile Navigation - Full Screen Overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-[9999] bg-background/95 backdrop-blur-sm">
+        <div 
+          className="lg:hidden fixed inset-0 z-[9999] bg-background/95 backdrop-blur-sm" 
+          style={{ zIndex: 9999 }}
+          onClick={handleOverlayClick}
+        >
           <div className="flex flex-col h-full">
             {/* Mobile Header */}
             <div className="flex items-center justify-between p-4 border-b">

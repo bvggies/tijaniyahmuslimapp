@@ -71,30 +71,18 @@ export default function QiblaPage() {
   const [deviceOrientation, setDeviceOrientation] = useState<number | null>(null)
   const [isCalibrated, setIsCalibrated] = useState(false)
   const [orientationSupported, setOrientationSupported] = useState(true)
+  const [manualRotation, setManualRotation] = useState(0)
   const compassRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Check if device orientation is supported
-    if (typeof DeviceOrientationEvent === 'undefined' || 
-        typeof (DeviceOrientationEvent as any).requestPermission === 'undefined') {
+    if (typeof DeviceOrientationEvent === 'undefined') {
       setOrientationSupported(false)
+      setIsCalibrated(false)
       return
     }
 
-    // Request permission for iOS 13+
-    const requestPermission = async () => {
-      try {
-        const permission = await (DeviceOrientationEvent as any).requestPermission()
-        if (permission === 'granted') {
-          startOrientationListener()
-        } else {
-          setOrientationSupported(false)
-        }
-      } catch (error) {
-        // Fallback for older browsers
-        startOrientationListener()
-      }
-    }
+    let cleanup: (() => void) | undefined
 
     const startOrientationListener = () => {
       const handleOrientationChange = (event: DeviceOrientationEvent) => {
@@ -108,17 +96,51 @@ export default function QiblaPage() {
       return () => window.removeEventListener('deviceorientation', handleOrientationChange)
     }
 
+    // Request permission for iOS 13+
+    const requestPermission = async () => {
+      try {
+        if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+          const permission = await (DeviceOrientationEvent as any).requestPermission()
+          if (permission === 'granted') {
+            cleanup = startOrientationListener()
+          } else {
+            setOrientationSupported(false)
+            setIsCalibrated(false)
+          }
+        } else {
+          // Fallback for older browsers
+          cleanup = startOrientationListener()
+        }
+      } catch (error) {
+        console.log('Orientation permission error:', error)
+        // Fallback for older browsers
+        cleanup = startOrientationListener()
+      }
+    }
+
     requestPermission()
+
+    return () => {
+      if (cleanup) {
+        cleanup()
+      }
+    }
   }, [])
 
   useEffect(() => {
-    if (qiblaInfo && deviceOrientation !== null && isCalibrated) {
-      // Calculate the rotation needed for the compass
-      // The compass should rotate to show the Qibla direction relative to North
-      const rotation = (360 - deviceOrientation + qiblaInfo.direction) % 360
-      setCompassRotation(rotation)
+    if (qiblaInfo) {
+      if (deviceOrientation !== null && isCalibrated) {
+        // Calculate the rotation needed for the compass
+        // The compass should rotate to show the Qibla direction relative to North
+        const rotation = (360 - deviceOrientation + qiblaInfo.direction) % 360
+        setCompassRotation(rotation)
+      } else if (!orientationSupported) {
+        // For devices without orientation support, use manual rotation
+        const rotation = (qiblaInfo.direction + manualRotation) % 360
+        setCompassRotation(rotation)
+      }
     }
-  }, [qiblaInfo, deviceOrientation, isCalibrated])
+  }, [qiblaInfo, deviceOrientation, isCalibrated, orientationSupported, manualRotation])
 
   const getCurrentLocation = async () => {
     setLoading(true)
@@ -171,8 +193,17 @@ export default function QiblaPage() {
   const calibrateCompass = () => {
     setIsCalibrated(false)
     setDeviceOrientation(null)
+    
     // Show calibration instructions
-    alert('Please rotate your device in a figure-8 motion to calibrate the compass, then hold it flat and level.')
+    const message = 'Please rotate your device in a figure-8 motion to calibrate the compass, then hold it flat and level. The compass will automatically calibrate when it detects movement.'
+    alert(message)
+    
+    // Auto-calibrate after a short delay if orientation is available
+    setTimeout(() => {
+      if (deviceOrientation !== null) {
+        setIsCalibrated(true)
+      }
+    }, 2000)
   }
 
   const getDirectionText = (bearing: number): string => {
@@ -318,10 +349,19 @@ export default function QiblaPage() {
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full shadow-lg z-10"></div>
                     
                     {/* Calibration status */}
-                    {!isCalibrated && (
+                    {!isCalibrated && orientationSupported && (
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-16">
                         <div className="bg-yellow-100 border border-yellow-300 rounded-lg px-3 py-1 text-xs text-yellow-800">
                           Calibrating...
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* No orientation support message */}
+                    {!orientationSupported && (
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-16">
+                        <div className="bg-blue-100 border border-blue-300 rounded-lg px-3 py-1 text-xs text-blue-800 text-center">
+                          Static Compass<br/>Rotate device manually
                         </div>
                       </div>
                     )}
@@ -351,18 +391,38 @@ export default function QiblaPage() {
 
                   {/* Calibration Controls */}
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button
-                      variant="outline"
-                      onClick={calibrateCompass}
-                      className="flex items-center gap-2"
-                    >
-                      <RotateCcwIcon className="h-4 w-4" />
-                      Calibrate Compass
-                    </Button>
-                    {!orientationSupported && (
-                      <div className="flex items-center gap-2 text-yellow-600 text-sm">
-                        <AlertCircleIcon className="h-4 w-4" />
-                        Device orientation not supported
+                    {orientationSupported ? (
+                      <Button
+                        variant="outline"
+                        onClick={calibrateCompass}
+                        className="flex items-center gap-2"
+                      >
+                        <RotateCcwIcon className="h-4 w-4" />
+                        Calibrate Compass
+                      </Button>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2 text-blue-600 text-sm">
+                          <AlertCircleIcon className="h-4 w-4" />
+                          Manual rotation required
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setManualRotation(prev => (prev - 15) % 360)}
+                          >
+                            ←
+                          </Button>
+                          <span className="text-xs text-muted-foreground">Rotate</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setManualRotation(prev => (prev + 15) % 360)}
+                          >
+                            →
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
