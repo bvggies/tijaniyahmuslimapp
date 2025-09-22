@@ -9,10 +9,7 @@ import {
   NavigationIcon,
   RefreshCwIcon,
   TargetIcon,
-  GlobeIcon,
-  ArrowUpIcon,
-  RotateCcwIcon,
-  AlertCircleIcon
+  GlobeIcon
 } from 'lucide-react'
 
 interface Location {
@@ -67,80 +64,8 @@ export default function QiblaPage() {
   const [qiblaInfo, setQiblaInfo] = useState<QiblaInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [compassRotation, setCompassRotation] = useState(0)
-  const [deviceOrientation, setDeviceOrientation] = useState<number | null>(null)
-  const [isCalibrated, setIsCalibrated] = useState(false)
-  const [orientationSupported, setOrientationSupported] = useState(true)
-  const [manualRotation, setManualRotation] = useState(0)
   const compassRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    // Check if device orientation is supported
-    if (typeof DeviceOrientationEvent === 'undefined') {
-      setOrientationSupported(false)
-      setIsCalibrated(false)
-      return
-    }
-
-    let cleanup: (() => void) | undefined
-
-    const startOrientationListener = () => {
-      const handleOrientationChange = (event: DeviceOrientationEvent) => {
-        if (event.alpha !== null) {
-          setDeviceOrientation(event.alpha)
-          setIsCalibrated(true)
-        }
-      }
-
-      window.addEventListener('deviceorientation', handleOrientationChange)
-      return () => window.removeEventListener('deviceorientation', handleOrientationChange)
-    }
-
-    // Request permission for iOS 13+
-    const requestPermission = async () => {
-      try {
-        if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-          const permission = await (DeviceOrientationEvent as any).requestPermission()
-          if (permission === 'granted') {
-            cleanup = startOrientationListener()
-          } else {
-            setOrientationSupported(false)
-            setIsCalibrated(false)
-          }
-        } else {
-          // Fallback for older browsers
-          cleanup = startOrientationListener()
-        }
-      } catch (error) {
-        console.log('Orientation permission error:', error)
-        // Fallback for older browsers
-        cleanup = startOrientationListener()
-      }
-    }
-
-    requestPermission()
-
-    return () => {
-      if (cleanup) {
-        cleanup()
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    if (qiblaInfo) {
-      if (deviceOrientation !== null && isCalibrated) {
-        // Calculate the rotation needed for the compass
-        // The compass should rotate to show the Qibla direction relative to North
-        const rotation = (360 - deviceOrientation + qiblaInfo.direction) % 360
-        setCompassRotation(rotation)
-      } else if (!orientationSupported) {
-        // For devices without orientation support, use manual rotation
-        const rotation = (qiblaInfo.direction + manualRotation) % 360
-        setCompassRotation(rotation)
-      }
-    }
-  }, [qiblaInfo, deviceOrientation, isCalibrated, orientationSupported, manualRotation])
 
   const getCurrentLocation = async () => {
     setLoading(true)
@@ -190,21 +115,6 @@ export default function QiblaPage() {
     }
   }
 
-  const calibrateCompass = () => {
-    setIsCalibrated(false)
-    setDeviceOrientation(null)
-    
-    // Show calibration instructions
-    const message = 'Please rotate your device in a figure-8 motion to calibrate the compass, then hold it flat and level. The compass will automatically calibrate when it detects movement.'
-    alert(message)
-    
-    // Auto-calibrate after a short delay if orientation is available
-    setTimeout(() => {
-      if (deviceOrientation !== null) {
-        setIsCalibrated(true)
-      }
-    }, 2000)
-  }
 
   const getDirectionText = (bearing: number): string => {
     const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
@@ -306,7 +216,7 @@ export default function QiblaPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-center space-y-6">
-                  {/* Compass */}
+                  {/* Simple Compass */}
                   <div className="relative w-80 h-80 mx-auto">
                     {/* Outer ring */}
                     <div className="absolute inset-0 rounded-full border-4 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/20 shadow-2xl">
@@ -323,48 +233,38 @@ export default function QiblaPage() {
                       <div className="absolute bottom-6 right-1/2 transform translate-x-1/2 text-primary/70 font-medium text-sm">SW</div>
                     </div>
 
-                    {/* Rotating compass face */}
+                    {/* Qibla Direction Arrow */}
                     <div 
                       ref={compassRef}
                       className="absolute inset-4 rounded-full border-2 border-primary/20 bg-gradient-to-br from-background to-primary/5"
                       style={{
-                        transform: `rotate(${compassRotation}deg)`,
+                        transform: `rotate(${qiblaInfo.direction}deg)`,
                         transition: 'transform 0.5s ease-out'
                       }}
                     >
-                      {/* Compass needle pointing to Qibla */}
+                      {/* Large Qibla arrow pointing to Mecca */}
                       <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-                        <div className="w-0 h-0 border-l-6 border-r-6 border-b-12 border-transparent border-b-red-500 shadow-lg"></div>
-                        <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-transparent border-b-red-600 absolute top-1 left-1/2 transform -translate-x-1/2"></div>
+                        <div className="w-0 h-0 border-l-8 border-r-8 border-b-16 border-transparent border-b-red-500 shadow-lg"></div>
+                        <div className="w-0 h-0 border-l-6 border-r-6 border-b-12 border-transparent border-b-red-600 absolute top-1 left-1/2 transform -translate-x-1/2"></div>
                       </div>
                       
-                      {/* Qibla indicator dot */}
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-lg"></div>
-                        <div className="absolute inset-0 w-3 h-3 bg-red-500 rounded-full animate-ping opacity-20"></div>
+                      {/* Qibla text */}
+                      <div className="absolute top-20 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                          QIBLA
+                        </div>
                       </div>
                     </div>
                     
                     {/* Center dot */}
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full shadow-lg z-10"></div>
                     
-                    {/* Calibration status */}
-                    {!isCalibrated && orientationSupported && (
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-16">
-                        <div className="bg-yellow-100 border border-yellow-300 rounded-lg px-3 py-1 text-xs text-yellow-800">
-                          Calibrating...
-                        </div>
+                    {/* Instructions */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-20">
+                      <div className="bg-green-100 border border-green-300 rounded-lg px-4 py-2 text-sm text-green-800 text-center">
+                        Face this direction<br/>to pray towards Mecca
                       </div>
-                    )}
-                    
-                    {/* No orientation support message */}
-                    {!orientationSupported && (
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-16">
-                        <div className="bg-blue-100 border border-blue-300 rounded-lg px-3 py-1 text-xs text-blue-800 text-center">
-                          Static Compass<br/>Rotate device manually
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
 
                   {/* Direction Information */}
@@ -389,43 +289,6 @@ export default function QiblaPage() {
                     </div>
                   </div>
 
-                  {/* Calibration Controls */}
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    {orientationSupported ? (
-                      <Button
-                        variant="outline"
-                        onClick={calibrateCompass}
-                        className="flex items-center gap-2"
-                      >
-                        <RotateCcwIcon className="h-4 w-4" />
-                        Calibrate Compass
-                      </Button>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="flex items-center gap-2 text-blue-600 text-sm">
-                          <AlertCircleIcon className="h-4 w-4" />
-                          Manual rotation required
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setManualRotation(prev => (prev - 15) % 360)}
-                          >
-                            ←
-                          </Button>
-                          <span className="text-xs text-muted-foreground">Rotate</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setManualRotation(prev => (prev + 15) % 360)}
-                          >
-                            →
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -449,19 +312,15 @@ export default function QiblaPage() {
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">2</div>
-                  <div>Hold your device flat and level (parallel to the ground)</div>
+                  <div>Look at the red arrow pointing to "QIBLA"</div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">3</div>
-                  <div>Tap "Calibrate Compass" and rotate your device in a figure-8 motion</div>
+                  <div>Face the direction the arrow is pointing</div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">4</div>
-                  <div>Rotate your body until the red needle points to the red dot</div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">5</div>
-                  <div>You're now facing the Qibla direction</div>
+                  <div>You're now facing Mecca - ready to pray!</div>
                 </div>
               </div>
             </CardContent>
@@ -480,7 +339,7 @@ export default function QiblaPage() {
                   The Qibla is the direction Muslims face during prayer, pointing towards the Kaaba in Mecca, Saudi Arabia.
                 </p>
                 <p>
-                  This compass uses your device's GPS location and orientation sensors to calculate the exact direction.
+                  This compass uses your GPS location to calculate the exact direction to Mecca from anywhere in the world.
                 </p>
                 <p>
                   The distance shown is the straight-line distance from your location to the Kaaba.
