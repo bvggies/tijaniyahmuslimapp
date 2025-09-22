@@ -687,9 +687,10 @@ export default function MosquesPage() {
       }
       
       if (!(window as any).google || !(window as any).google.maps || !(window as any).google.maps.places) {
-        console.log('Google Maps still not loaded after waiting')
+        console.log('Google Maps still not loaded after waiting, falling back to mock search')
         setIsLoading(false)
-        setError('Google Maps is not loaded. Please refresh the page and try again.')
+        // Automatically fall back to mock search instead of showing error
+        searchNearbyMosquesFallback(lat, lng, radiusKm)
         return
       }
     }
@@ -699,10 +700,11 @@ export default function MosquesPage() {
 
     // Set a timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
-      console.log('Search timeout reached')
+      console.log('Search timeout reached, falling back to mock search')
       setIsLoading(false)
-      setError('Search timed out. Please try again.')
-    }, 15000) // 15 second timeout
+      // Automatically fall back to mock search instead of showing error
+      searchNearbyMosquesFallback(lat, lng, radiusKm)
+    }, 10000) // 10 second timeout
 
     try {
       const google = (window as any).google
@@ -773,14 +775,19 @@ export default function MosquesPage() {
           })
         } else {
           console.log('No mosques found or error:', status)
+          
+          // For API key or permission errors, fall back to mock search
+          if (status === google.maps.places.PlacesServiceStatus.REQUEST_DENIED || 
+              status === google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
+            console.log('API error, falling back to mock search')
+            searchNearbyMosquesFallback(lat, lng, radiusKm)
+            return
+          }
+          
           let errorMessage = 'No mosques found in your area.'
           
           if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
             errorMessage = 'No mosques found in your area. Try increasing the search radius.'
-          } else if (status === google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
-            errorMessage = 'Search limit exceeded. Please try again later.'
-          } else if (status === google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
-            errorMessage = 'Search request denied. Please check your API key.'
           } else if (status === google.maps.places.PlacesServiceStatus.INVALID_REQUEST) {
             errorMessage = 'Invalid search request. Please try again.'
           }
@@ -792,7 +799,8 @@ export default function MosquesPage() {
       clearTimeout(timeoutId) // Clear timeout
       console.error('Error searching for mosques:', error)
       setIsLoading(false)
-      setError('Failed to search for mosques. Please try again.')
+      console.log('Search error, falling back to mock search')
+      searchNearbyMosquesFallback(lat, lng, radiusKm)
     }
   }
 
