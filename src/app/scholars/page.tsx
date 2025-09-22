@@ -57,7 +57,7 @@ const scholars: Scholar[] = [
     country: 'Ghana',
     language: ['Arabic', 'Hausa', 'English'],
     description: 'A true and faithful scholar whose interest lay mainly in prayers, remembrance of Allah, repentance, and seeking forgiveness. He devoted his whole life to the service of Allah and spreading Tariqatu Tijaniyya.',
-    image: 'https://drive.google.com/uc?export=view&id=1XBGxf5ypoABMNk2-fX07UVsJeTMXsUve',
+    image: '/images/Sheikh Abdullah.jpg',
     rating: 5.0,
     isFavorite: false,
     lectures: [

@@ -118,7 +118,7 @@ export default function SheikhAbdullahiMaikanoPage() {
           <div className="relative inline-block mb-6">
             <div className="w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-primary/20 shadow-2xl">
               <img
-                src="https://drive.google.com/uc?export=view&id=1XBGxf5ypoABMNk2-fX07UVsJeTMXsUve"
+                src="/images/Sheikh Abdullah.jpg"
                 alt="Sheikh Alhaji Abdullahi Ahmad Maikano (R.A) - Baba Jalloo"
                 className="w-full h-full object-cover"
                 onError={(e) => {
