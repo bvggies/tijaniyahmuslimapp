@@ -51,151 +51,6 @@ interface Lecture {
 const scholars: Scholar[] = [
   {
     id: '1',
-    name: 'Sheikh Abdul Nasir Jangda',
-    title: 'Imam and Islamic Scholar',
-    specialization: ['Quran', 'Hadith', 'Fiqh', 'Tafsir'],
-    country: 'United States',
-    language: ['English', 'Arabic', 'Urdu'],
-    description: 'Renowned scholar known for his deep understanding of Quranic sciences and contemporary Islamic issues.',
-    image: '/api/placeholder/150/150',
-    website: 'https://quranacademy.io',
-    youtube: 'https://youtube.com/@QuranAcademy',
-    twitter: '@QuranAcademy',
-    rating: 4.9,
-    isFavorite: false,
-    lectures: [
-      {
-        id: '1',
-        title: 'Understanding the Quran in Modern Times',
-        duration: '45 min',
-        description: 'A comprehensive lecture on how to understand and apply Quranic teachings in contemporary life.',
-        url: 'https://youtube.com/watch?v=example1',
-        views: 125000,
-        date: new Date('2024-01-15'),
-        category: 'Quran'
-      },
-      {
-        id: '2',
-        title: 'The Importance of Prayer in Islam',
-        duration: '30 min',
-        description: 'Deep dive into the significance and proper performance of daily prayers.',
-        url: 'https://youtube.com/watch?v=example2',
-        views: 89000,
-        date: new Date('2024-01-10'),
-        category: 'Prayer'
-      }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Dr. Yasir Qadhi',
-    title: 'Islamic Scholar and Author',
-    specialization: ['Hadith', 'Seerah', 'Aqeedah', 'History'],
-    country: 'United States',
-    language: ['English', 'Arabic'],
-    description: 'Prominent scholar specializing in Islamic history, theology, and contemporary issues.',
-    image: '/api/placeholder/150/150',
-    website: 'https://yasirqadhi.com',
-    youtube: 'https://youtube.com/@YasirQadhi',
-    twitter: '@YasirQadhi',
-    rating: 4.8,
-    isFavorite: false,
-    lectures: [
-      {
-        id: '3',
-        title: 'The Life of Prophet Muhammad (PBUH)',
-        duration: '60 min',
-        description: 'Detailed biography of the Prophet covering his early life, mission, and legacy.',
-        url: 'https://youtube.com/watch?v=example3',
-        views: 200000,
-        date: new Date('2024-01-20'),
-        category: 'Seerah'
-      }
-    ]
-  },
-  {
-    id: '3',
-    name: 'Sheikh Omar Suleiman',
-    title: 'Imam and Islamic Scholar',
-    specialization: ['Spirituality', 'Social Justice', 'Youth Issues', 'Community Building'],
-    country: 'United States',
-    language: ['English', 'Arabic'],
-    description: 'Dynamic scholar focused on spiritual development and social justice in Islam.',
-    image: '/api/placeholder/150/150',
-    website: 'https://yaqeeninstitute.org',
-    youtube: 'https://youtube.com/@YaqeenInstitute',
-    twitter: '@omarsuleiman504',
-    rating: 4.9,
-    isFavorite: false,
-    lectures: [
-      {
-        id: '4',
-        title: 'Building a Strong Muslim Community',
-        duration: '40 min',
-        description: 'Guidance on fostering unity and strength within Muslim communities.',
-        url: 'https://youtube.com/watch?v=example4',
-        views: 150000,
-        date: new Date('2024-01-18'),
-        category: 'Community'
-      }
-    ]
-  },
-  {
-    id: '4',
-    name: 'Dr. Shabir Ally',
-    title: 'Islamic Scholar and Interfaith Activist',
-    specialization: ['Interfaith Dialogue', 'Quran', 'Comparative Religion', 'Apologetics'],
-    country: 'Canada',
-    language: ['English', 'Arabic', 'French'],
-    description: 'Scholar known for his work in interfaith dialogue and Islamic apologetics.',
-    image: '/api/placeholder/150/150',
-    website: 'https://letmeturnthetables.com',
-    youtube: 'https://youtube.com/@LetMeTurnTheTables',
-    twitter: '@ShabirAlly',
-    rating: 4.7,
-    isFavorite: false,
-    lectures: [
-      {
-        id: '5',
-        title: 'Islam and Other Religions',
-        duration: '50 min',
-        description: 'Understanding Islam\'s relationship with other faiths and promoting dialogue.',
-        url: 'https://youtube.com/watch?v=example5',
-        views: 95000,
-        date: new Date('2024-01-12'),
-        category: 'Interfaith'
-      }
-    ]
-  },
-  {
-    id: '5',
-    name: 'Sheikh Hamza Yusuf',
-    title: 'Islamic Scholar and Founder of Zaytuna College',
-    specialization: ['Classical Islamic Sciences', 'Philosophy', 'Spirituality', 'Education'],
-    country: 'United States',
-    language: ['English', 'Arabic', 'Spanish'],
-    description: 'Renowned scholar and founder of Zaytuna College, specializing in classical Islamic education.',
-    image: '/api/placeholder/150/150',
-    website: 'https://zaytuna.edu',
-    youtube: 'https://youtube.com/@ZaytunaCollege',
-    twitter: '@HamzaYusuf',
-    rating: 4.9,
-    isFavorite: false,
-    lectures: [
-      {
-        id: '6',
-        title: 'The Crisis of Modern Education',
-        duration: '55 min',
-        description: 'Analysis of contemporary educational challenges and Islamic solutions.',
-        url: 'https://youtube.com/watch?v=example6',
-        views: 180000,
-        date: new Date('2024-01-08'),
-        category: 'Education'
-      }
-    ]
-  },
-  {
-    id: '6',
     name: 'Sheikh Alhaji Abdullahi Ahmad Maikano (R.A)',
     title: 'Baba Jalloo - Tijaniyya Scholar and Khalifa',
     specialization: ['Tijaniyya Tariqa', 'Prayer', 'Dhikr', 'Quran', 'Spirituality', 'Tasawwuf'],
@@ -207,32 +62,92 @@ const scholars: Scholar[] = [
     isFavorite: false,
     lectures: [
       {
-        id: '7',
+        id: '1',
         title: 'The Importance of Dhikr in Tijaniyya',
         duration: '45 min',
         description: 'Deep insights into the practice of remembrance of Allah in the Tijaniyya tradition.',
-        url: 'https://youtube.com/watch?v=example7',
+        url: 'https://youtube.com/watch?v=example1',
         views: 250000,
         date: new Date('2004-06-15'),
         category: 'Spirituality'
       },
       {
-        id: '8',
+        id: '2',
+        title: 'The Path of Tijaniyya Tariqa',
+        duration: '50 min',
+        description: 'Understanding the spiritual path and practices of the Tijaniyya order.',
+        url: 'https://youtube.com/watch?v=example2',
+        views: 180000,
+        date: new Date('2004-05-20'),
+        category: 'Tasawwuf'
+      },
+      {
+        id: '3',
+        title: 'Prayer and Its Spiritual Significance',
+        duration: '35 min',
+        description: 'The deeper meaning and spiritual benefits of regular prayer in Islamic practice.',
+        url: 'https://youtube.com/watch?v=example3',
+        views: 220000,
+        date: new Date('2004-04-10'),
+        category: 'Prayer'
+      },
+      {
+        id: '4',
+        title: 'The Beauty of Repentance and Forgiveness',
+        duration: '40 min',
+        description: 'Guidance on seeking forgiveness and the transformative power of sincere repentance.',
+        url: 'https://youtube.com/watch?v=example4',
+        views: 195000,
+        date: new Date('2004-03-15'),
+        category: 'Spirituality'
+      },
+      {
+        id: '5',
+        title: 'Quranic Recitation and Its Spiritual Impact',
+        duration: '55 min',
+        description: 'The spiritual benefits and proper methods of Quranic recitation in daily practice.',
+        url: 'https://youtube.com/watch?v=example5',
+        views: 210000,
+        date: new Date('2004-02-20'),
+        category: 'Quran'
+      },
+      {
+        id: '6',
         title: 'Spreading Tariqatu Tijaniyya in West Africa',
         duration: '60 min',
         description: 'Historical account of the establishment and growth of Tijaniyya in Ghana and West Africa.',
-        url: 'https://youtube.com/watch?v=example8',
+        url: 'https://youtube.com/watch?v=example6',
         views: 180000,
         date: new Date('2003-09-20'),
         category: 'History'
+      },
+      {
+        id: '7',
+        title: 'The Spiritual Journey of a Tijaniyya Disciple',
+        duration: '48 min',
+        description: 'Guidance on the spiritual development and progression within the Tijaniyya tradition.',
+        url: 'https://youtube.com/watch?v=example7',
+        views: 165000,
+        date: new Date('2003-08-15'),
+        category: 'Tasawwuf'
+      },
+      {
+        id: '8',
+        title: 'The Power of Morning and Evening Adhkar',
+        duration: '42 min',
+        description: 'Understanding the significance and benefits of morning and evening remembrance of Allah.',
+        url: 'https://youtube.com/watch?v=example8',
+        views: 200000,
+        date: new Date('2003-07-10'),
+        category: 'Dhikr'
       }
     ]
   }
 ]
 
-const specializations = ['All', 'Quran', 'Hadith', 'Fiqh', 'Tafsir', 'Seerah', 'Aqeedah', 'History', 'Spirituality', 'Social Justice', 'Interfaith Dialogue', 'Education', 'Tijaniyya Tariqa', 'Prayer', 'Dhikr', 'Tasawwuf']
+const specializations = ['All', 'Tijaniyya Tariqa', 'Prayer', 'Dhikr', 'Quran', 'Spirituality', 'Tasawwuf']
 
-const categories = ['All', 'Quran', 'Prayer', 'Seerah', 'Community', 'Interfaith', 'Education', 'Spirituality']
+const categories = ['All', 'Spirituality', 'Prayer', 'Quran', 'Tasawwuf', 'Dhikr', 'History']
 
 export default function ScholarsPage() {
   const [scholarsList, setScholarsList] = useState<Scholar[]>(scholars)
@@ -366,13 +281,27 @@ export default function ScholarsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <GraduationCapIcon className="h-6 w-6 text-primary" />
+                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
+                      {scholar.id === '1' ? (
+                        <img
+                          src={scholar.image}
+                          alt={scholar.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/api/placeholder/48/48';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-primary/10 rounded-full flex items-center justify-center">
+                          <GraduationCapIcon className="h-6 w-6 text-primary" />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <CardTitle className="text-lg">{scholar.name}</CardTitle>
                       <CardDescription>{scholar.title}</CardDescription>
-                      {scholar.id === '6' && (
+                      {scholar.id === '1' && (
                         <Badge variant="secondary" className="mt-1 text-xs">
                           <BookOpenIcon className="h-3 w-3 mr-1" />
                           Detailed Biography

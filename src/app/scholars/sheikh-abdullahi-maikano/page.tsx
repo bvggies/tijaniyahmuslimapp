@@ -116,15 +116,20 @@ export default function SheikhAbdullahiMaikanoPage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="relative inline-block mb-6">
-            <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-primary/20 shadow-2xl">
+            <div className="w-40 h-40 mx-auto rounded-full overflow-hidden border-4 border-primary/20 shadow-2xl">
               <img
                 src="https://drive.google.com/uc?export=view&id=1XBGxf5ypoABMNk2-fX07UVsJeTMXsUve"
-                alt="Sheikh Alhaji Abdullahi Ahmad Maikano (R.A)"
+                alt="Sheikh Alhaji Abdullahi Ahmad Maikano (R.A) - Baba Jalloo"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/api/placeholder/160/160';
+                }}
+                loading="lazy"
               />
             </div>
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <StarIcon className="h-4 w-4 text-white fill-current" />
+            <div className="absolute -top-2 -right-2 w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg">
+              <StarIcon className="h-5 w-5 text-white fill-current" />
             </div>
           </div>
           
