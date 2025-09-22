@@ -38,28 +38,31 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       <Header />
-      <main className="relative">
-        {/* Location Bar - Muslim Pro Style */}
-        <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-border/50 py-2">
-          <div className="container mx-auto px-4">
+      <main className="relative pb-20">
+        {/* Location Bar - Mobile Optimized */}
+        <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-border/50 py-1.5">
+          <div className="container mx-auto px-3">
             <div className="flex items-center justify-center">
-              <LocationDisplay variant="compact" className="text-sm" />
+              <LocationDisplay variant="compact" className="text-xs" />
             </div>
           </div>
         </div>
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-6">
           {children}
         </div>
       </main>
       <Footer />
       <BackToHome variant="floating" />
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           duration: 4000,
           style: {
             background: 'var(--primary)',
             color: 'var(--primary-foreground)',
+            borderRadius: '12px',
+            fontSize: '14px',
+            padding: '12px 16px',
           },
         }}
       />

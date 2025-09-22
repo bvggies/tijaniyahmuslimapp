@@ -1,5 +1,104 @@
 @import "tailwindcss";
 
+/* Mobile-first optimizations */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Mobile-specific utilities */
+.mobile-padding {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .mobile-padding {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Touch-friendly buttons */
+button, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile card optimizations */
+.muslim-card {
+  transition: all 0.2s ease-in-out;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.muslim-card:active {
+  transform: scale(0.98);
+}
+
+/* Mobile grid improvements */
+.grid-mobile {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+@media (min-width: 640px) {
+  .grid-mobile {
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+/* Mobile text sizing */
+.text-mobile-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.text-mobile-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-mobile-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.text-mobile-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+/* Mobile spacing */
+.space-mobile-y > * + * {
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .space-mobile-y > * + * {
+    margin-top: 1rem;
+  }
+}
+
 :root {
   /* Dark Mode (Default) */
   --background: #075c45;

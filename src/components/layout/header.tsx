@@ -46,20 +46,23 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <div className="container flex h-14 items-center justify-between px-3">
+        {/* Logo - Mobile Optimized */}
         <Link href="/" className="flex items-center">
-          <Logo size="sm" animated={false} showText={true} />
+          <Logo size="sm" animated={false} showText={false} />
+          <span className="ml-2 text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Tijaniyah
+          </span>
         </Link>
 
-        {/* Search Bar */}
-        <div className="hidden md:block">
+        {/* Search Bar - Hidden on mobile */}
+        <div className="hidden lg:block flex-1 max-w-md mx-4">
           <SearchBar placeholder="Search anything..." />
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
+        {/* Desktop Navigation - Hidden on mobile */}
+        <nav className="hidden lg:flex items-center space-x-1">
           {/* Theme Toggle */}
           <ThemeToggle />
           
@@ -91,65 +94,84 @@ export function Header() {
         </nav>
 
         {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? (
-            <XIcon className="h-6 w-6" />
-          ) : (
-            <MenuIcon className="h-6 w-6" />
-          )}
-        </Button>
+        <div className="flex items-center space-x-2 lg:hidden">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="h-8 w-8"
+          >
+            {isMobileMenuOpen ? (
+              <XIcon className="h-5 w-5" />
+            ) : (
+              <MenuIcon className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - Full Screen Overlay */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t bg-background/95 backdrop-blur-sm">
-          <nav className="container py-3">
-            {/* Mobile Search */}
-            <div className="mb-4">
-              <SearchBar placeholder="Search anything..." />
+        <div className="lg:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
+          <div className="flex flex-col h-full">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center">
+                <Logo size="sm" animated={false} showText={false} />
+                <span className="ml-2 text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Tijaniyah
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="h-8 w-8"
+              >
+                <XIcon className="h-5 w-5" />
+              </Button>
             </div>
             
-            {/* Mobile Theme Toggle */}
-            <div className="mb-4">
-              <ThemeToggle />
+            {/* Mobile Search */}
+            <div className="p-4 border-b">
+              <SearchBar placeholder="Search anything..." />
             </div>
             
             {/* Mobile Back to Home Button - Only show when not on homepage */}
             {pathname !== '/' && (
-              <div className="mb-4">
+              <div className="p-4 border-b">
                 <BackToHome variant="minimal" />
               </div>
             )}
             
-            <div className="flex flex-wrap gap-1">
-              {navigation.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
-                return (
-                  <Link key={item.name} href={item.href} prefetch={true}>
-                    <Button
-                      variant={isActive ? "islamic" : item.special ? "default" : "ghost"}
-                      size="sm"
-                      className={cn(
-                        "flex items-center space-x-1 px-3 py-2 text-xs",
-                        isActive && "text-primary-foreground",
-                        item.special && "bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90 shadow-lg"
-                      )}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Icon className="h-3 w-3" />
-                      <span>{item.name}</span>
-                    </Button>
-                  </Link>
-                )
-              })}
+            {/* Mobile Navigation Grid */}
+            <div className="flex-1 p-4">
+              <div className="grid grid-cols-2 gap-3">
+                {navigation.map((item) => {
+                  const Icon = item.icon
+                  const isActive = pathname === item.href
+                  return (
+                    <Link key={item.name} href={item.href} prefetch={true}>
+                      <Button
+                        variant={isActive ? "islamic" : item.special ? "default" : "ghost"}
+                        size="lg"
+                        className={cn(
+                          "flex flex-col items-center space-y-2 h-20 px-4",
+                          isActive && "text-primary-foreground",
+                          item.special && "bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90 shadow-lg"
+                        )}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Icon className="h-6 w-6" />
+                        <span className="text-xs font-medium">{item.name}</span>
+                      </Button>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
-          </nav>
+          </div>
         </div>
       )}
     </header>
