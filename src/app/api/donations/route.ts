@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { readDonations, addDonation, updateDonation } from '@/lib/donations-storage'
 
-// In-memory storage for donations (in production, use a database)
-let donations: any[] = [
+// Mock donations for demo purposes
+const mockDonations: any[] = [
   {
     id: '1',
     donorName: 'Ahmad Hassan',
@@ -32,11 +33,15 @@ let donations: any[] = [
 // GET - Fetch all donations
 export async function GET() {
   try {
+    const donations = readDonations()
+    // If no donations exist, return mock data
+    const data = donations.length > 0 ? donations : mockDonations
     return NextResponse.json({
       success: true,
-      data: donations
+      data: data
     })
   } catch (error) {
+    console.error('Error fetching donations:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch donations' },
       { status: 500 }
@@ -49,20 +54,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     
-    const newDonation = {
-      id: Date.now().toString(),
+    const newDonation = addDonation({
       donorName: body.donorName,
       donorEmail: body.donorEmail,
       donorPhone: body.donorPhone || '',
       amount: parseFloat(body.amount),
       currency: 'GHS',
       message: body.message || '',
-      receiptUrl: body.receiptUrl || '/receipts/default.pdf',
-      status: 'pending',
-      submittedAt: new Date().toISOString()
-    }
-    
-    donations.push(newDonation)
+      receiptUrl: body.receiptUrl || '/receipts/default.pdf'
+    })
     
     return NextResponse.json({
       success: true,
@@ -83,24 +83,21 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { id, status, verifiedBy } = body
     
-    const donationIndex = donations.findIndex(d => d.id === id)
-    if (donationIndex === -1) {
+    const updatedDonation = updateDonation(id, {
+      status,
+      verifiedBy: verifiedBy || 'admin'
+    })
+    
+    if (!updatedDonation) {
       return NextResponse.json(
         { success: false, error: 'Donation not found' },
         { status: 404 }
       )
     }
     
-    donations[donationIndex] = {
-      ...donations[donationIndex],
-      status,
-      verifiedAt: new Date().toISOString(),
-      verifiedBy: verifiedBy || 'admin'
-    }
-    
     return NextResponse.json({
       success: true,
-      data: donations[donationIndex],
+      data: updatedDonation,
       message: 'Donation status updated successfully'
     })
   } catch (error) {
