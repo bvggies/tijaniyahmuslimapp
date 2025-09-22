@@ -272,7 +272,7 @@ export default function ScholarsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredScholars.map((scholar) => (
             <Card key={scholar.id} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => {
-              if (scholar.id === '6') {
+              if (scholar.id === '1') {
                 window.location.href = '/scholars/sheikh-abdullahi-maikano'
               } else {
                 setSelectedScholar(scholar)

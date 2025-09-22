@@ -29,14 +29,14 @@ export default function SheikhAbdullahiMaikanoPage() {
   // Load favorite status from localStorage
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('scholar-favorites') || '[]')
-    setIsFavorite(favorites.includes('6'))
+    setIsFavorite(favorites.includes('1'))
   }, [])
 
   const toggleFavorite = () => {
     const favorites = JSON.parse(localStorage.getItem('scholar-favorites') || '[]')
-    const newFavorites = favorites.includes('6')
-      ? favorites.filter((id: string) => id !== '6')
-      : [...favorites, '6']
+    const newFavorites = favorites.includes('1')
+      ? favorites.filter((id: string) => id !== '1')
+      : [...favorites, '1']
     
     localStorage.setItem('scholar-favorites', JSON.stringify(newFavorites))
     setIsFavorite(!isFavorite)
