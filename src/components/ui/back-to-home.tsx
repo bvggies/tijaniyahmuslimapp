@@ -31,9 +31,10 @@ export function BackToHome({ className, variant = 'default' }: BackToHomeProps) 
         size="sm"
         variant="islamic"
         className={cn(
-          "fixed bottom-6 right-6 z-50 rounded-full shadow-lg hover:shadow-xl transition-all duration-300",
+          "fixed bottom-6 right-6 z-[100] rounded-full shadow-lg hover:shadow-xl transition-all duration-300",
           "bg-primary hover:bg-primary/90 text-primary-foreground",
           "w-12 h-12 p-0",
+          "mobile-safe-area",
           className
         )}
         title="Back to Home"

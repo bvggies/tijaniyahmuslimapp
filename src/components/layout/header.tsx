@@ -119,7 +119,7 @@ export function Header() {
 
       {/* Mobile Navigation - Full Screen Overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
+        <div className="lg:hidden fixed inset-0 z-[9999] bg-background/95 backdrop-blur-sm">
           <div className="flex flex-col h-full">
             {/* Mobile Header */}
             <div className="flex items-center justify-between p-4 border-b">
@@ -158,16 +158,20 @@ export function Header() {
                   const Icon = item.icon
                   const isActive = pathname === item.href
                   return (
-                    <Link key={item.name} href={item.href} prefetch={true}>
+                    <Link 
+                      key={item.name} 
+                      href={item.href} 
+                      prefetch={true}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
                       <Button
                         variant={isActive ? "islamic" : item.special ? "default" : "ghost"}
                         size="lg"
                         className={cn(
-                          "flex flex-col items-center space-y-2 h-16 px-3",
+                          "flex flex-col items-center space-y-2 h-16 px-3 w-full",
                           isActive && "text-primary-foreground",
                           item.special && "bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90 shadow-lg"
                         )}
-                        onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <Icon className="h-5 w-5" />
                         <span className="text-xs font-medium text-center leading-tight">{item.name}</span>

@@ -47,7 +47,7 @@ export function ForceUpdate() {
   }, [])
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+    <div className="fixed bottom-4 right-4 z-[80] flex flex-col gap-2 mobile-safe-area">
       <Button
         onClick={handleCheckUpdates}
         variant="outline"

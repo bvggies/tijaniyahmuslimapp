@@ -68,12 +68,12 @@ export function PWAInstall() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     window.addEventListener('appinstalled', handleAppInstalled)
 
-    // Show install prompt after 5 seconds if not already shown
+    // Show install prompt after 3 seconds if not already shown
     const timer = setTimeout(() => {
       if (!isInstalled && !showInstallPrompt && !isDismissed) {
         setShowInstallPrompt(true)
       }
-    }, 5000)
+    }, 3000)
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -136,13 +136,18 @@ For Firefox:
     return null
   }
 
-  // Don't show if not supported, already installed, dismissed, or not showing
-  if (!isSupported || isInstalled || isDismissed || !showInstallPrompt) {
+  // Don't show if already installed or dismissed
+  if (isInstalled || isDismissed) {
+    return null
+  }
+
+  // Show on mobile even if not supported (for manual install instructions)
+  if (!isSupported && !showInstallPrompt) {
     return null
   }
 
   return (
-    <div className="fixed bottom-20 right-4 z-50">
+    <div className="fixed bottom-20 right-4 z-[90] mobile-safe-area">
       <Button
         onClick={handleInstallClick}
         className="w-12 h-12 rounded-full islamic-gradient text-white hover:opacity-90 shadow-lg flex items-center justify-center"
