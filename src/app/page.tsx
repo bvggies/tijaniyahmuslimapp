@@ -23,7 +23,8 @@ import {
   LogOutIcon,
   ShieldIcon,
   SunIcon,
-  MoonIcon
+  MoonIcon,
+  GraduationCapIcon
 } from 'lucide-react'
 import { formatTime, formatDate, getNextPrayerTime } from '@/lib/utils'
 import { PrayerTime } from '@/types'
@@ -43,7 +44,7 @@ const mockPrayerTimes: PrayerTime = {
 const features = [
   {
     title: 'Prayer Times',
-    description: 'Accurate prayer times for your location',
+    description: 'Accurate prayer times based on your location',
     icon: ClockIcon,
     href: '/prayer-times',
     color: 'from-blue-500 to-blue-600',
@@ -51,47 +52,87 @@ const features = [
   },
   {
     title: 'Qibla Compass',
-    description: 'Find the direction of Kaaba',
+    description: 'Find the direction of the Kaaba from anywhere',
     icon: CompassIcon,
     href: '/qibla',
     color: 'from-green-500 to-green-600',
     bgColor: 'bg-green-50 dark:bg-green-950/20'
   },
   {
-    title: 'Quran Reader',
-    description: 'Read and listen to the Holy Quran',
-    icon: BookOpenIcon,
-    href: '/quran',
-    color: 'from-purple-500 to-purple-600',
-    bgColor: 'bg-purple-50 dark:bg-purple-950/20'
-  },
-  {
     title: 'Duas & Supplications',
-    description: 'Collection of authentic Islamic duas',
+    description: 'Comprehensive collection of Islamic prayers',
     icon: HeartIcon,
     href: '/duas',
     color: 'from-pink-500 to-pink-600',
     bgColor: 'bg-pink-50 dark:bg-pink-950/20'
   },
   {
+    title: 'Quran Reader',
+    description: 'Read the Holy Quran with translations',
+    icon: BookOpenIcon,
+    href: '/quran',
+    color: 'from-purple-500 to-purple-600',
+    bgColor: 'bg-purple-50 dark:bg-purple-950/20'
+  },
+  {
     title: 'Digital Tasbih',
-    description: 'Count your dhikr and tasbih',
+    description: 'Count your dhikr with our digital tasbih',
     icon: CircleDotIcon,
     href: '/tasbih',
     color: 'from-orange-500 to-orange-600',
     bgColor: 'bg-orange-50 dark:bg-orange-950/20'
   },
   {
-    title: 'Community',
-    description: 'Connect with fellow Muslims',
-    icon: MessageCircleIcon,
-    href: '/community',
+    title: 'Wazifa',
+    description: 'Daily Islamic practices and routines',
+    icon: StarIcon,
+    href: '/wazifa',
+    color: 'from-yellow-500 to-yellow-600',
+    bgColor: 'bg-yellow-50 dark:bg-yellow-950/20'
+  },
+  {
+    title: 'Lazim Tracker',
+    description: 'Track your daily Islamic commitments',
+    icon: CalendarIcon,
+    href: '/lazim',
     color: 'from-indigo-500 to-indigo-600',
     bgColor: 'bg-indigo-50 dark:bg-indigo-950/20'
   },
   {
-    title: 'Mosque Finder',
-    description: 'Find nearby mosques and Islamic centers',
+    title: 'Zikr Jumma',
+    description: 'Special Friday prayers and dhikr',
+    icon: StarIcon,
+    href: '/zikr-jumma',
+    color: 'from-amber-500 to-amber-600',
+    bgColor: 'bg-amber-50 dark:bg-amber-950/20'
+  },
+  {
+    title: 'Islamic Journal',
+    description: 'Reflect on your spiritual journey',
+    icon: BookOpenIcon,
+    href: '/journal',
+    color: 'from-emerald-500 to-emerald-600',
+    bgColor: 'bg-emerald-50 dark:bg-emerald-950/20'
+  },
+  {
+    title: 'Scholars',
+    description: 'Learn from Islamic scholars and teachers',
+    icon: GraduationCapIcon,
+    href: '/scholars',
+    color: 'from-violet-500 to-violet-600',
+    bgColor: 'bg-violet-50 dark:bg-violet-950/20'
+  },
+  {
+    title: 'Community',
+    description: 'Connect with fellow Muslims worldwide',
+    icon: MessageCircleIcon,
+    href: '/community',
+    color: 'from-cyan-500 to-cyan-600',
+    bgColor: 'bg-cyan-50 dark:bg-cyan-950/20'
+  },
+  {
+    title: 'Mosque Locator',
+    description: 'Find nearby mosques and prayer facilities',
     icon: MapPinIcon,
     href: '/mosques',
     color: 'from-teal-500 to-teal-600',
@@ -99,7 +140,7 @@ const features = [
   },
   {
     title: 'Makkah Live',
-    description: 'Watch live streams from Makkah',
+    description: 'Watch live streams from the Holy Kaaba',
     icon: VideoIcon,
     href: '/makkah-live',
     color: 'from-red-500 to-red-600',
@@ -110,16 +151,16 @@ const features = [
     description: 'AI-powered Islamic assistant',
     icon: BotIcon,
     href: '/ai-noor',
-    color: 'from-cyan-500 to-cyan-600',
-    bgColor: 'bg-cyan-50 dark:bg-cyan-950/20'
+    color: 'from-slate-500 to-slate-600',
+    bgColor: 'bg-slate-50 dark:bg-slate-950/20'
   },
   {
     title: 'Donate',
     description: 'Support Islamic causes',
     icon: HeartHandshakeIcon,
     href: '/donate',
-    color: 'from-emerald-500 to-emerald-600',
-    bgColor: 'bg-emerald-50 dark:bg-emerald-950/20',
+    color: 'from-rose-500 to-rose-600',
+    bgColor: 'bg-rose-50 dark:bg-rose-950/20',
     special: true
   }
 ]

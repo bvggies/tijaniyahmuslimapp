@@ -37,7 +37,13 @@ const navigation = [
   { name: 'Quran', href: '/quran', icon: BookOpenIcon },
   { name: 'Duas', href: '/duas', icon: HeartIcon },
   { name: 'Tasbih', href: '/tasbih', icon: CircleDotIcon },
+  { name: 'Wazifa', href: '/wazifa', icon: StarIcon },
+  { name: 'Lazim', href: '/lazim', icon: CalendarIcon },
+  { name: 'Scholars', href: '/scholars', icon: GraduationCapIcon },
   { name: 'Community', href: '/community', icon: MessageCircleIcon },
+  { name: 'Mosques', href: '/mosques', icon: MapPinIcon },
+  { name: 'Makkah Live', href: '/makkah-live', icon: VideoIcon },
+  { name: 'AI Noor', href: '/ai-noor', icon: BotIcon },
   { name: 'Donate', href: '/donate', icon: HeartHandshakeIcon, special: true },
 ]
 
@@ -146,7 +152,7 @@ export function Header() {
             )}
             
             {/* Mobile Navigation Grid */}
-            <div className="flex-1 p-4">
+            <div className="flex-1 p-4 overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
                 {navigation.map((item) => {
                   const Icon = item.icon
@@ -157,14 +163,14 @@ export function Header() {
                         variant={isActive ? "islamic" : item.special ? "default" : "ghost"}
                         size="lg"
                         className={cn(
-                          "flex flex-col items-center space-y-2 h-20 px-4",
+                          "flex flex-col items-center space-y-2 h-16 px-3",
                           isActive && "text-primary-foreground",
                           item.special && "bg-gradient-to-r from-primary to-accent text-white hover:from-primary/90 hover:to-accent/90 shadow-lg"
                         )}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <Icon className="h-6 w-6" />
-                        <span className="text-xs font-medium">{item.name}</span>
+                        <Icon className="h-5 w-5" />
+                        <span className="text-xs font-medium text-center leading-tight">{item.name}</span>
                       </Button>
                     </Link>
                   )
