@@ -10,7 +10,9 @@ import {
   RefreshCwIcon,
   TargetIcon,
   GlobeIcon,
-  ArrowUpIcon
+  ArrowUpIcon,
+  RotateCcwIcon,
+  AlertCircleIcon
 } from 'lucide-react'
 
 interface Location {
@@ -30,7 +32,7 @@ interface QiblaInfo {
 const KAABA_LAT = 21.4225
 const KAABA_LNG = 39.8262
 
-// Calculate Qibla direction
+// Calculate Qibla direction using the correct formula
 const calculateQibla = (lat: number, lng: number): QiblaInfo => {
   const lat1 = (lat * Math.PI) / 180
   const lat2 = (KAABA_LAT * Math.PI) / 180
@@ -43,7 +45,7 @@ const calculateQibla = (lat: number, lng: number): QiblaInfo => {
   bearing = (bearing * 180) / Math.PI
   bearing = (bearing + 360) % 360
 
-  // Calculate distance to Kaaba
+  // Calculate distance to Kaaba using Haversine formula
   const R = 6371 // Earth's radius in kilometers
   const dLat = (KAABA_LAT - lat) * Math.PI / 180
   const dLng = (KAABA_LNG - lng) * Math.PI / 180
@@ -67,27 +69,56 @@ export default function QiblaPage() {
   const [error, setError] = useState<string | null>(null)
   const [compassRotation, setCompassRotation] = useState(0)
   const [deviceOrientation, setDeviceOrientation] = useState<number | null>(null)
+  const [isCalibrated, setIsCalibrated] = useState(false)
+  const [orientationSupported, setOrientationSupported] = useState(true)
   const compassRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Listen for device orientation changes
-    const handleOrientationChange = (event: DeviceOrientationEvent) => {
-      if (event.alpha !== null) {
-        setDeviceOrientation(event.alpha)
+    // Check if device orientation is supported
+    if (typeof DeviceOrientationEvent === 'undefined' || 
+        typeof (DeviceOrientationEvent as any).requestPermission === 'undefined') {
+      setOrientationSupported(false)
+      return
+    }
+
+    // Request permission for iOS 13+
+    const requestPermission = async () => {
+      try {
+        const permission = await (DeviceOrientationEvent as any).requestPermission()
+        if (permission === 'granted') {
+          startOrientationListener()
+        } else {
+          setOrientationSupported(false)
+        }
+      } catch (error) {
+        // Fallback for older browsers
+        startOrientationListener()
       }
     }
 
-    window.addEventListener('deviceorientation', handleOrientationChange)
-    return () => window.removeEventListener('deviceorientation', handleOrientationChange)
+    const startOrientationListener = () => {
+      const handleOrientationChange = (event: DeviceOrientationEvent) => {
+        if (event.alpha !== null) {
+          setDeviceOrientation(event.alpha)
+          setIsCalibrated(true)
+        }
+      }
+
+      window.addEventListener('deviceorientation', handleOrientationChange)
+      return () => window.removeEventListener('deviceorientation', handleOrientationChange)
+    }
+
+    requestPermission()
   }, [])
 
   useEffect(() => {
-    if (qiblaInfo && deviceOrientation !== null) {
+    if (qiblaInfo && deviceOrientation !== null && isCalibrated) {
       // Calculate the rotation needed for the compass
-      const rotation = (qiblaInfo.direction - deviceOrientation + 360) % 360
+      // The compass should rotate to show the Qibla direction relative to North
+      const rotation = (360 - deviceOrientation + qiblaInfo.direction) % 360
       setCompassRotation(rotation)
     }
-  }, [qiblaInfo, deviceOrientation])
+  }, [qiblaInfo, deviceOrientation, isCalibrated])
 
   const getCurrentLocation = async () => {
     setLoading(true)
@@ -135,6 +166,13 @@ export default function QiblaPage() {
         setLoading(false)
       }
     }
+  }
+
+  const calibrateCompass = () => {
+    setIsCalibrated(false)
+    setDeviceOrientation(null)
+    // Show calibration instructions
+    alert('Please rotate your device in a figure-8 motion to calibrate the compass, then hold it flat and level.')
   }
 
   const getDirectionText = (bearing: number): string => {
@@ -238,32 +276,55 @@ export default function QiblaPage() {
               <CardContent>
                 <div className="text-center space-y-6">
                   {/* Compass */}
-                  <div className="relative w-64 h-64 mx-auto">
+                  <div className="relative w-80 h-80 mx-auto">
+                    {/* Outer ring */}
+                    <div className="absolute inset-0 rounded-full border-4 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/20 shadow-2xl">
+                      {/* Direction markers */}
+                      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-primary font-bold text-lg">N</div>
+                      <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-primary font-bold text-lg">S</div>
+                      <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-primary font-bold text-lg">W</div>
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary font-bold text-lg">E</div>
+                      
+                      {/* Secondary direction markers */}
+                      <div className="absolute top-6 left-1/2 transform -translate-x-1/2 text-primary/70 font-medium text-sm">NE</div>
+                      <div className="absolute top-6 right-1/2 transform translate-x-1/2 text-primary/70 font-medium text-sm">NW</div>
+                      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-primary/70 font-medium text-sm">SE</div>
+                      <div className="absolute bottom-6 right-1/2 transform translate-x-1/2 text-primary/70 font-medium text-sm">SW</div>
+                    </div>
+
+                    {/* Rotating compass face */}
                     <div 
                       ref={compassRef}
-                      className="absolute inset-0 rounded-full border-4 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10"
+                      className="absolute inset-4 rounded-full border-2 border-primary/20 bg-gradient-to-br from-background to-primary/5"
                       style={{
                         transform: `rotate(${compassRotation}deg)`,
-                        transition: 'transform 0.3s ease-out'
+                        transition: 'transform 0.5s ease-out'
                       }}
                     >
-                      {/* Compass needle */}
-                      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-8 border-transparent border-b-primary"></div>
+                      {/* Compass needle pointing to Qibla */}
+                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                        <div className="w-0 h-0 border-l-6 border-r-6 border-b-12 border-transparent border-b-red-500 shadow-lg"></div>
+                        <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-transparent border-b-red-600 absolute top-1 left-1/2 transform -translate-x-1/2"></div>
+                      </div>
                       
-                      {/* Direction markers */}
-                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-primary font-bold text-sm">N</div>
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-primary font-bold text-sm">S</div>
-                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-primary font-bold text-sm">W</div>
-                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-primary font-bold text-sm">E</div>
-                      
-                      {/* Qibla indicator */}
+                      {/* Qibla indicator dot */}
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <div className="w-2 h-2 bg-gold-500 rounded-full animate-pulse"></div>
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse shadow-lg"></div>
+                        <div className="absolute inset-0 w-3 h-3 bg-red-500 rounded-full animate-ping opacity-20"></div>
                       </div>
                     </div>
                     
                     {/* Center dot */}
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full shadow-lg z-10"></div>
+                    
+                    {/* Calibration status */}
+                    {!isCalibrated && (
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-16">
+                        <div className="bg-yellow-100 border border-yellow-300 rounded-lg px-3 py-1 text-xs text-yellow-800">
+                          Calibrating...
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Direction Information */}
@@ -272,7 +333,7 @@ export default function QiblaPage() {
                       <div className="text-2xl font-bold text-primary">
                         {qiblaInfo.direction.toFixed(1)}°
                       </div>
-                      <div className="text-sm text-muted-foreground">Direction</div>
+                      <div className="text-sm text-muted-foreground">Qibla Direction</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">
@@ -286,6 +347,24 @@ export default function QiblaPage() {
                       </div>
                       <div className="text-sm text-muted-foreground">Distance to Kaaba</div>
                     </div>
+                  </div>
+
+                  {/* Calibration Controls */}
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={calibrateCompass}
+                      className="flex items-center gap-2"
+                    >
+                      <RotateCcwIcon className="h-4 w-4" />
+                      Calibrate Compass
+                    </Button>
+                    {!orientationSupported && (
+                      <div className="flex items-center gap-2 text-yellow-600 text-sm">
+                        <AlertCircleIcon className="h-4 w-4" />
+                        Device orientation not supported
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -310,14 +389,18 @@ export default function QiblaPage() {
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">2</div>
-                  <div>Hold your device flat and level</div>
+                  <div>Hold your device flat and level (parallel to the ground)</div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">3</div>
-                  <div>Rotate until the needle points to the red dot</div>
+                  <div>Tap "Calibrate Compass" and rotate your device in a figure-8 motion</div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">4</div>
+                  <div>Rotate your body until the red needle points to the red dot</div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">5</div>
                   <div>You're now facing the Qibla direction</div>
                 </div>
               </div>
