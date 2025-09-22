@@ -524,8 +524,9 @@ export default function MosquesPage() {
       console.log('Google Maps API Key:', apiKey ? 'Present' : 'Missing')
       console.log('API Key value:', apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined')
       
+      // Always proceed with the API key (either from env or fallback)
       if (!apiKey) {
-        console.warn('Google Maps API key not found. Map functionality will be limited.')
+        console.error('No Google Maps API key available')
         setError('Google Maps API key not configured. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your Vercel environment variables.')
         return
       }
@@ -549,7 +550,17 @@ export default function MosquesPage() {
       }
       script.onerror = (error) => {
         console.error('Google Maps failed to load:', error)
+        console.error('Script src:', script.src)
+        console.error('API Key used:', apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined')
         setError(`Failed to load Google Maps. API Key: ${apiKey ? 'Present' : 'Missing'}. Please check your Vercel environment variables.`)
+        
+        // Automatically try fallback search if user location is available
+        if (userLocation) {
+          console.log('Automatically trying fallback search...')
+          setTimeout(() => {
+            searchNearbyMosquesFallback(userLocation.latitude, userLocation.longitude, radius[0])
+          }, 1000)
+        }
       }
       document.head.appendChild(script)
     }
@@ -1209,24 +1220,36 @@ export default function MosquesPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+                {error ? (
                   <div className="flex items-center justify-center h-96 bg-muted/50 rounded-lg">
                     <div className="text-center">
                       <MapIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                        Map Not Available
+                        {error.includes('API key') ? 'Map Configuration Issue' : 'Search Error'}
                       </h3>
                       <p className="text-muted-foreground mb-4">
-                        Google Maps API key is not configured. The map will show mock data only.
+                        {error}
                       </p>
-                      <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                        {mosques.slice(0, 4).map((mosque) => (
-                          <div key={mosque.id} className="p-3 bg-white rounded border">
-                            <h4 className="font-medium text-sm">{mosque.name}</h4>
-                            <p className="text-xs text-muted-foreground">{mosque.address}</p>
-                            <p className="text-xs text-primary">{formatDistance(mosque.distance)}</p>
-                          </div>
-                        ))}
+                      <div className="space-y-2">
+                        <Button
+                          onClick={() => {
+                            if (userLocation) {
+                              searchNearbyMosquesFallback(userLocation.latitude, userLocation.longitude, radius[0])
+                            }
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <SearchIcon className="h-4 w-4" />
+                          Try Fallback Search
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => window.location.reload()}
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCwIcon className="h-4 w-4" />
+                          Refresh Page
+                        </Button>
                       </div>
                     </div>
                   </div>
